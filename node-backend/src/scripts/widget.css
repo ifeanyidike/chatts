@@ -1,0 +1,16 @@
+#chatts__container {
+  border: none;
+  z-index: 9999999;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+.chatts__expand_style {
+  width: 380px;
+  height: 600px;
+}
+
+.chatts__compress_style {
+  width: 126px;
+  height: 40px;
+}

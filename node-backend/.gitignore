@@ -1,0 +1,22 @@
+# External dependencies
+/node_modules
+
+# Bundled output
+/dist
+
+# Parcel-bundler cache files
+/.cache
+
+# Log Files
+*.log
+
+# Environment variables
+.env
+.env.development
+
+#local vscode settings file
+.vscode/settings.json
+.idea
+*.no-commit.js
+.DS_Store
+ecosystem.config.js
