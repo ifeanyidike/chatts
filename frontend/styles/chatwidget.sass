@@ -1,0 +1,63 @@
+.chatwidget
+  position: relative
+  background-color: white
+  color: #1d1d1d
+
+  .chatwidget__messagelist 
+    width: 100%
+    min-height: 450px
+    border: 1px solid red
+    position: relative
+    .messagelist__typingindicator
+      position: absolute
+      bottom: 0
+      width: 100%
+      text-align: center
+      .typingindicator__loading
+        background-color: blue
+        width: auto
+        padding: 20px
+        span
+          width: 15px
+          height: 15px
+          margin: 0 1px
+          // background-color: 
+      
+  .chatwidget__emojiopener
+    position: absolute
+    bottom: 20px
+    left: 10px
+    cursor: pointer
+  
+  .chatwidget__emojipicker 
+    position: absolute
+    bottom: 65px
+  
+  .chatwidget__input 
+    border-radius: 10px
+    border: none
+    resize: none
+    height: 57px
+    transition: height 0.1s ease-in
+    width: 100%
+    background-color: #ecebeb
+    padding: 20px
+    padding-left: 42px
+    color: #1d1d1d
+    @media (max-width: 540px) 
+      width: 90%
+  
+  .chatwidget__send
+    position: absolute
+    right: 0
+    bottom: 5px
+    cursor: pointer
+    background-color: white
+    height: 55px
+    width: 10%
+    border: 0
+    @media (min-width: 540px) 
+      display: none
+    
+
+  
