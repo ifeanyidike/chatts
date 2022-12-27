@@ -2,16 +2,49 @@
   position: relative
   background-color: white
   color: #1d1d1d
+  height: 600px
+
+  .chatwidget__top
+    background-color: #0a82c8
+    height: 50px
+    position: relative
+    display: flex
+    justify-content: space-around
+    align-items: center
+    
+    .chatwidget__topinfo
+      color: #ffffff
+      flex: 0.9
+      display: flex
+      align-items: center
+      .onlineindicator
+        width: 10px
+        height: 10px
+        background-color: #0ac872
+        border-radius: 50%
+      span
+        margin-left: 5px      
+
+    .close
+      width: 20px
+      height: 20px
+      background-color: transparent
+      border: 0
+      // position: absolute
+      // right: 15px
+      // top: 35%
+      cursor: pointer
 
   .chatwidget__messagelist 
     width: 100%
-    min-height: 450px
-    border: 1px solid red
+    min-height: 520px
     position: relative
     .messagelist__typingindicator
       position: absolute
-      bottom: 0
+      bottom: 50px
       width: 100%
+      font-size: 12px
+      font-style: italic
       text-align: center
       .typingindicator__loading
         background-color: blue
@@ -22,42 +55,69 @@
           height: 15px
           margin: 0 1px
           // background-color: 
-      
-  .chatwidget__emojiopener
+
+  .chatwidget__messageinput
     position: absolute
-    bottom: 20px
-    left: 10px
-    cursor: pointer
-  
-  .chatwidget__emojipicker 
-    position: absolute
-    bottom: 65px
-  
-  .chatwidget__input 
-    border-radius: 10px
-    border: none
-    resize: none
-    height: 57px
-    transition: height 0.1s ease-in
+    bottom: 0
     width: 100%
-    background-color: #ecebeb
-    padding: 20px
-    padding-left: 42px
-    color: #1d1d1d
-    @media (max-width: 540px) 
-      width: 90%
+    border-bottom-left-radius: 20px
+    border-bottom-right-radius: 20px
+    display: flex
+    justify-content: space-between
+      
+    .chatwidget__emojiopener
+      position: absolute
+      bottom: 15px
+      left: 15px
+      cursor: pointer
   
-  .chatwidget__send
-    position: absolute
-    right: 0
-    bottom: 5px
-    cursor: pointer
-    background-color: white
-    height: 55px
-    width: 10%
-    border: 0
-    @media (min-width: 540px) 
-      display: none
-    
+    .chatwidget__emojipicker 
+      position: absolute
+      bottom: 65px
+  
+    .chatwidget__input 
+      border-radius: 18px
+      border: none
+      resize: none
+      height: 50px
+      transition: height 0.1s ease-in
+      flex: 0.99
+      margin: 5px
+      // width: 90%
+      background-color: #ecebeb
+      padding: 20px
+      padding-left: 42px
+      color: #1d1d1d
+      @media (max-width: 540px) 
+        // width: 100%
+  
+    .chatwidget__send
+      // position: absolute
+      // right: 0
+      // bottom: 5px
+      cursor: pointer
+      background-color: white
+      height: 55px
+      width: 10%
+      border: 0
+      @media (min-width: 540px) 
+        display: none
+
+.chaticon
+  cursor: pointer
+  width: 90px
+  height: 90px 
+  border-radius: 50%
+  background-color: #40b5f9
+  border: none
+  padding: 15px
+  svg
+    filter: hue-rotate(150deg) saturate(2)
+    cursor: pointer   
+    width: 100%
+    height: 100%
+
+
+   
 
   
