@@ -1,4 +1,5 @@
 (function (d, w) {
+  console.log(w.location);
   let iframe = d.createElement('iframe'),
     src = new URL(d.currentScript.src),
     s = d.createElement('link');
@@ -9,7 +10,10 @@
     (iframe.id = 'chatts__container'),
     (iframe.setAttribute('allow', 'autoplay; fullscreen *;'),
     (iframe.setAttribute('allowtransparency', true),
-    iframe.setAttribute('src', 'http://localhost:3000/chat-widget'),
+    iframe.setAttribute(
+      'src',
+      `http://localhost:3000/chat-widget?key=${w.key}`
+    ),
     // (iframe.src = 'http://localhost:3000/chat-widget'),
     d.body.appendChild(iframe))),
     iframe.classList.add('chatts__compress_style');

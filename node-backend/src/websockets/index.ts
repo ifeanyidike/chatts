@@ -24,7 +24,7 @@ const initializeSocket = (
       // console.log({ newUser });
     });
     socket.on('isTyping', data => {
-      socket.emit('isTyping', data);
+      socket.emit('onUserTyping', data);
     });
   });
 };

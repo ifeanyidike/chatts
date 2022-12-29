@@ -1,4 +1,5 @@
 import React, { FC, ReactNode, useState, useEffect, useRef } from 'react';
+import useSWR from 'swr';
 import { useSocket } from '../components/SocketProvider';
 import useTypingIndicator from '../hooks/useTypingIndicator';
 // import { ChatWidgetContainer } from '../styles/ChatWidgetStyles';
@@ -11,11 +12,13 @@ import SendIcon from '../assets/components/SendIcon';
 import Image from 'next/image';
 import ChatButton from '../assets/components/ChatButton';
 import CloseIcon from '../assets/components/CloseIcon';
-import TypingAnimation from '../assets/gifs/typing-animation-3x.gif';
+import { useRouter } from 'next/router';
+import { BASE, noAuthFetcher } from '../utils/appUtil';
 
 const inter = Inter({ subsets: ['latin'] });
+// const fetcher = (...args: any[]) => fetch(...args).then(res => res.json());
 
-const ChatWidget: FC<ReactNode> = () => {
+const ChatWidget: FC<ReactNode> = (props: any) => {
   const user = {
     id: undefined,
     email: undefined,
@@ -31,7 +34,30 @@ const ChatWidget: FC<ReactNode> = () => {
   const [widgetOpen, toggleWidget] = useState<undefined | boolean>(undefined);
   const [isInIframe, setIsInIframe] = useState(false);
 
-  const isTyping = useTypingIndicator(inputRef);
+  const { isTyping, handleDown, handleUp } = useTypingIndicator();
+  const router = useRouter();
+  const { key } = router.query;
+
+  const { data, error } = useSWR(
+    key ? `${BASE}/channels/${key}` : null,
+    key ? noAuthFetcher : null
+  );
+
+  // const fetchData =
+  // useEffect(() => {
+  //   console.log('ROUTER QUERY', router.query);
+  //   if (!router.query.key) return;
+  //   (async () => {
+  //     const { data } = await axios.get(
+  //       `http://localhost:9100/api/channels/${router.query.key}`
+  //     );
+  //     console.log('QUERY DATA', { data });
+  //   })();
+  // }, [router.query]);
+
+  // console.log({ data, error });
+
+  console.log({ data, error });
 
   // useEffect(() => {
   //   const isInIframe = window.location !== window.parent.location;
@@ -64,11 +90,9 @@ const ChatWidget: FC<ReactNode> = () => {
   }, [isTyping, socket]);
 
   useEffect(() => {
-    console.log({ socket });
     if (!socket) return;
     socket.on('message', (data: any) => console.log({ data }));
-    socket.on('isTyping', (data: any) => {
-      console.log('IN SOCKET', data);
+    socket.on('onUserTyping', (data: any) => {
       if (data.isTyping) {
         setUserTyping(`${data.user.name} is typing`);
       } else {
@@ -97,6 +121,7 @@ const ChatWidget: FC<ReactNode> = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    handleDown();
     if (!formRef?.current) return;
     if (e.key === 'Enter' && e.shiftKey === false) {
       e.preventDefault();
@@ -109,22 +134,14 @@ const ChatWidget: FC<ReactNode> = () => {
 
     return widgetOpen;
   };
-  // console.log({ userTyping });
+
+  if (data !== undefined && !data)
+    throw new Error('Invalid authorization code');
   return (
     <>
       {!openWidget() ? (
         <button className="chaticon" onClick={() => toggleWidget(!widgetOpen)}>
           <ChatButton />
-          {/* <Image
-            src={ChatImage Icon}
-            alt="Chat button"
-            style={{
-              // color: 'red',
-              width: 150,
-              height: 150,
-              backgroundColor: 'transparent',
-            }}
-          /> */}
         </button>
       ) : (
         <form
@@ -148,9 +165,7 @@ const ChatWidget: FC<ReactNode> = () => {
           </div>
           <div className="chatwidget__messagelist">
             {userTyping && (
-              <span className="messagelist__typingindicator">
-                {userTyping} Please wait
-              </span>
+              <span className="messagelist__typingindicator">{userTyping}</span>
             )}
           </div>
           <div className="chatwidget__messageinput">
@@ -168,6 +183,7 @@ const ChatWidget: FC<ReactNode> = () => {
               className="chatwidget__input"
               ref={inputRef}
               onChange={e => setMessage(e.target.value)}
+              onKeyUp={handleUp}
               onKeyDown={handleKeyDown}
             />
             {!isInIframe && (
@@ -175,7 +191,6 @@ const ChatWidget: FC<ReactNode> = () => {
                 <SendIcon />
               </button>
             )}
-            {/* <button onClick={handleClick}>Send Socket</button> */}
           </div>
         </form>
       )}

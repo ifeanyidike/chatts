@@ -1,5 +1,6 @@
 import '../styles/globals.css';
 import '../styles/chatwidget.sass';
+import '../styles/sidebar.sass';
 import type { AppProps } from 'next/app';
 import MainLayout from '../components/MainLayout';
 

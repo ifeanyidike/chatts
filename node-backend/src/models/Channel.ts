@@ -14,12 +14,21 @@ const Channel = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    type: {
+      type: DataTypes.ENUM,
+      values: ['service', 'group', 'direct'],
+    },
+    url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
   },
   { timestamps: true }
 );
 
 (async () => {
-  await sequelize.sync({ force: true });
+  await sequelize.sync();
 })();
 
 export default Channel;
