@@ -1,0 +1,50 @@
+.chatitem
+    display: flex
+    justify-content: space-between
+    padding: 20px 15px
+    cursor: pointer
+    background-color: #f9f6f6
+
+    &.chatitem__selected
+        background-color: unset
+        border-right: 4px solid #2469bd
+
+    .chatitem__left
+        display: flex
+        .chatitem__profile-image
+            width: 43px
+            height: 43px
+            border-radius: 50%
+            border: 1px solid #ddd
+            display: flex
+            align-items: center
+            justify-content: center
+            img
+                border-color: #fff
+        
+        .chatitem__messageinfo
+            margin-left: 5px
+            font-size: 12px
+            display: flex
+            flex-direction: column
+            justify-content: center
+            .name
+                font-size: 14px
+            p.message
+                margin-top: 5px
+                color: #8d8d8d
+
+    .chatitem__otherinfo
+        display: flex
+        flex-direction: column
+        justify-content: center
+        span
+            color: #8d8d8d
+            font-size: 13px
+        p.delivery
+            margin-top: 5px
+            text-align: right
+                
+                
+
+

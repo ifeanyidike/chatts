@@ -2,18 +2,14 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../db/dbconfig';
 
 const User = sequelize.define(
-  'User',
+  'user',
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    lastName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -25,9 +21,12 @@ const User = sequelize.define(
         isEmail: true,
       },
     },
-    picture: {
+    image: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    emailVerified: {
+      type: DataTypes.TIME,
     },
   },
   {

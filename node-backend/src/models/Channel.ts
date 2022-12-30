@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../db/dbconfig';
 
 const Channel = sequelize.define(
-  'Channel',
+  'channel',
   {
     id: {
       type: DataTypes.INTEGER,

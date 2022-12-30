@@ -4,7 +4,7 @@ import Channel from './Channel';
 import User from './User';
 
 const Message = sequelize.define(
-  'Message',
+  'message',
   {
     id: {
       type: DataTypes.INTEGER,
