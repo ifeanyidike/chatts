@@ -9,22 +9,16 @@ import { useRouter } from 'next/router';
 import { BASE, noAuthFetcher } from '../utils/appUtil';
 import MessageInput from '../components/MessageInput';
 import MessageList from '../components/MessageList';
+import { useSession } from 'next-auth/react';
 
 const inter = Inter({ subsets: ['latin'] });
-// const fetcher = (...args: any[]) => fetch(...args).then(res => res.json());
 
 const ChatWidget: FC<ReactNode> = (props: any) => {
-  // const user = {
-  //   id: undefined,
-  //   email: undefined,
-  //   name: 'Guest',
-  // };
-
-  // const { socket } = useSocket();
-  // const [userTyping, setUserTyping] = useState('');
   const [widgetOpen, toggleWidget] = useState<undefined | boolean>(undefined);
   const [isInIframe, setIsInIframe] = useState(false);
   const [isTyping, setIsTyping] = useState<undefined | boolean>(undefined);
+  const { data: session } = useSession();
+  console.log({ session });
 
   const router = useRouter();
   const { key } = router.query;
@@ -33,31 +27,6 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
     key ? `${BASE}/channels/${key}` : null,
     key ? noAuthFetcher : null
   );
-
-  // const fetchData =
-  // useEffect(() => {
-  //   console.log('ROUTER QUERY', router.query);
-  //   if (!router.query.key) return;
-  //   (async () => {
-  //     const { data } = await axios.get(
-  //       `http://localhost:9100/api/channels/${router.query.key}`
-  //     );
-  //     console.log('QUERY DATA', { data });
-  //   })();
-  // }, [router.query]);
-
-  // console.log({ data, error });
-
-  // console.log({ data, error });
-
-  // useEffect(() => {
-  //   const isInIframe = window.location !== window.parent.location;
-  //   if (!isInIframe) {
-  //     toggleWidget(true);
-  //   } else {
-  //     toggleWidget(false);
-  //   }
-  // }, []);
 
   const bindEvent = (
     element: Window | Document,
@@ -73,25 +42,6 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
     setIsInIframe(window.location !== window.parent.location);
   }, []);
 
-  // useEffect(() => {
-  //   if (isTyping === undefined || !socket) return;
-  //   socket.emit('isTyping', { isTyping, user });
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isTyping, socket]);
-
-  // useEffect(() => {
-  //   if (!socket) return;
-  //   socket.on('message', (data: any) => console.log({ data }));
-  //   socket.on('onUserTyping', (data: any) => {
-  //     if (data.isTyping) {
-  //       setUserTyping(`${data.user.name} is typing`);
-  //     } else {
-  //       setUserTyping('');
-  //     }
-  //   });
-  // }, [socket]);
-
   useEffect(() => {
     bindEvent(window, 'message', function (e) {
       // console.log('message from widget', e);
@@ -106,23 +56,14 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
     window.parent.postMessage('chatts__loaded', '*');
   }, [widgetOpen]);
 
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-  //   handleDown();
-  //   if (!formRef?.current) return;
-  //   if (e.key === 'Enter' && e.shiftKey === false) {
-  //     e.preventDefault();
-  //     socket.emit('onSendMessage', { message, user });
-  //   }
-  // };
-
   const openWidget = () => {
     if (!isInIframe) return true;
 
     return widgetOpen;
   };
 
-  if (data !== undefined && !data)
-    throw new Error('Invalid authorization code');
+  // if (data !== undefined && !data)
+  //   throw new Error('Invalid authorization code');
   return (
     <>
       {!openWidget() ? (

@@ -1,4 +1,6 @@
 import '../styles/globals.css';
+import '../styles/main.sass';
+import '../styles/loaders.sass';
 import '../styles/chatwidget.sass';
 import '../styles/chatview.sass';
 import '../styles/sidebar.sass';
