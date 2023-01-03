@@ -10,12 +10,25 @@ export const MessageInput = dynamic(() => import('./MessageInput'), {
   ssr: false,
 });
 
-const MesagePane = () => {
+import { IUser } from '../interfaces/channeltypes';
+
+interface Props {
+  activeTab: string;
+  users: IUser[];
+  currentUser: IUser;
+}
+
+const MesagePane = (props: Props) => {
   const [isTyping, setIsTyping] = useState<undefined | boolean>(undefined);
+
   return (
     <div className="messagepane">
-      <MessagePaneHeader />
-      <MessageList isTyping={isTyping} isInIframe={false} />
+      <MessagePaneHeader currentUser={props.currentUser} />
+      <MessageList
+        currentUser={props.currentUser}
+        isTyping={isTyping}
+        isInIframe={false}
+      />
       <MessageInput isInIframe={false} setIsTyping={setIsTyping} />
     </div>
   );

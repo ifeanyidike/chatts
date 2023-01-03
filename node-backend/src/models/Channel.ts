@@ -1,31 +1,38 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../db/dbconfig';
+import User from './User';
 
 const Channel = sequelize.define(
   'channel',
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      unique: true,
     },
     key: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      primaryKey: true,
     },
-    type: {
-      type: DataTypes.ENUM,
-      values: ['service', 'group', 'direct'],
-    },
-    url: {
+    title: {
       type: DataTypes.STRING,
-      allowNull: true,
-      unique: true,
+      allowNull: false,
+    },
+    createdBy: {
+      type: DataTypes.UUID,
+      references: {
+        model: User,
+        key: 'id',
+      },
     },
   },
   { timestamps: true }
 );
+
+User.belongsToMany(Channel, { through: 'ChannelUsers' });
+Channel.belongsToMany(User, { through: 'ChannelUsers' });
 
 (async () => {
   await sequelize.sync();

@@ -3,8 +3,15 @@ import React from 'react';
 import { BiVideo } from 'react-icons/bi';
 import { FiSettings } from 'react-icons/fi';
 import { IoCallOutline } from 'react-icons/io5';
+import { IUser } from '../interfaces/channeltypes';
 
-const MessagePaneHeader = () => {
+interface Props {
+  currentUser: IUser;
+}
+
+const MessagePaneHeader = (props: Props) => {
+  const profileImage = props.currentUser?.image || '/avatar.png';
+
   return (
     <div className="messagepane__header">
       <h2>Message Detail</h2>
@@ -12,11 +19,13 @@ const MessagePaneHeader = () => {
       <div className="header__details">
         <div className="header__left">
           <div className="header__profile-image">
-            <Image src="/avatar.png" width="42" height="42" alt="Avatar" />
+            <Image src={profileImage} width="42" height="42" alt="Avatar" />
           </div>
           <div className="header__info">
-            <strong className="name">Ifeanyi Dike</strong>
-            <p className="status">This is the image</p>
+            <strong className="name">{props.currentUser.name}</strong>
+            <p className="status">
+              <i>No communication yet</i>
+            </p>
           </div>
         </div>
 

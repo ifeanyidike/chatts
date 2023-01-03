@@ -74,6 +74,7 @@ export const authOptions = {
   pages: {
     signIn: '/signin',
   },
+  allowDangerousEmailAccountLinking: true,
 };
 
 export default NextAuth(authOptions);

@@ -15,6 +15,7 @@ import '../styles/messageinput.sass';
 import type { AppProps } from 'next/app';
 import MainLayout from '../components/MainLayout';
 import { SessionProvider } from 'next-auth/react';
+import { SnackbarProvider } from 'notistack';
 
 export default function App({
   Component,
@@ -22,9 +23,11 @@ export default function App({
 }: AppProps) {
   return (
     <SessionProvider session={session}>
-      <MainLayout>
-        <Component {...pageProps} />
-      </MainLayout>
+      <SnackbarProvider maxSnack={1}>
+        <MainLayout>
+          <Component {...pageProps} />
+        </MainLayout>
+      </SnackbarProvider>
     </SessionProvider>
   );
 }

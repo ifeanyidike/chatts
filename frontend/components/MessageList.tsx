@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useSocket } from './SocketProvider';
+import { IUser } from '../interfaces/channeltypes';
+import { useSession } from 'next-auth/react';
 
 interface Props {
   isTyping: undefined | boolean;
   isInIframe: undefined | boolean;
+  currentUser?: IUser;
+}
+
+interface IUserTyping {
+  name?: string;
+  email?: string;
 }
 const MessageList = (props: Props) => {
   const { socket } = useSocket();
   const { isTyping, isInIframe } = props;
-  const [userTyping, setUserTyping] = useState('');
+  const [userTyping, setUserTyping] = useState<IUserTyping>({});
+  const { data: session } = useSession();
 
-  const user = {
-    id: undefined,
+  const user = session?.user || {
     email: undefined,
+    image: undefined,
     name: 'Guest',
   };
 
@@ -27,10 +36,12 @@ const MessageList = (props: Props) => {
     if (!socket) return;
     socket.on('message', (data: any) => console.log({ data }));
     socket.on('onUserTyping', (data: any) => {
+      console.log({ data });
       if (data.isTyping) {
-        setUserTyping(`${data.user.name} is typing`);
+        const { name, email } = data.user || {};
+        setUserTyping({ name, email });
       } else {
-        setUserTyping('');
+        setUserTyping({});
       }
     });
   }, [socket]);
@@ -39,9 +50,11 @@ const MessageList = (props: Props) => {
     <div
       className={`messagelist ${!isInIframe ? 'desktop-view' : 'iframe-view'}`}
     >
-      {userTyping && (
-        <span className="messagelist__typingindicator">{userTyping}</span>
-      )}
+      {Object.keys(userTyping).length && userTyping.email !== user?.email ? (
+        <span className="messagelist__typingindicator">
+          <>{userTyping.name} is typing</>
+        </span>
+      ) : null}
     </div>
   );
 };

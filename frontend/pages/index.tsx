@@ -1,18 +1,52 @@
 import React, { FC, ReactNode, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { Inter } from '@next/font/google';
 import styles from '../styles/Home.module.css';
 import LoginButton from '../components/LoginButton';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { RippleMultiLoader } from '../components/Loaders';
 import Header from '../components/Header';
-import { BASE } from '../utils/appUtil';
+import { BASE, noAuthFetcher } from '../utils/appUtil';
+import useSWR from 'swr';
+import ChatChannelIcon from '../assets/components/ChatChannelIcon';
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const Home: FC<ReactNode> = () => {
+interface IChannelUsers {
+  channelKey: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+}
+interface IUserChannels {
+  ChannelUsers: IChannelUsers;
+  createdBy: string;
+  id: string;
+  key: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Props {
+  channels: IUserChannels[];
+  userId: string;
+}
+
+const Home = (props: Props) => {
+  const { enqueueSnackbar } = useSnackbar();
   const { data: session } = useSession({ required: false });
+  const [startCreateChannel, setStartCreateChannel] = useState(false);
+  const channels: IUserChannels[] = props.channels;
+  const [channelName, setChannelName] = useState<null | string>(null);
+  const router = useRouter();
+
+  const { user } = session || {};
 
   useEffect(() => {
     if (session === null) {
@@ -20,6 +54,29 @@ const Home: FC<ReactNode> = () => {
     }
   }, [session]);
 
+  const handleCreateChannel = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!channelName) {
+      return enqueueSnackbar('Channel name cannot be empty', {
+        variant: 'info',
+        autoHideDuration: 5000,
+      });
+    }
+    const { data } = await axios.post(`${BASE}/channels`, {
+      channelName,
+      userId: props.userId,
+    });
+    if (data.length) {
+      const result = data[0];
+      router.push(`/chats/${result.channelKey}`);
+    }
+  };
+  // const { data, error } = useSWR(
+  //   user?.email ? `${BASE}/channels/user-channels/${user.email}` : null,
+  //   user?.email ? noAuthFetcher : null
+  // );
+
+  // console.log({ data, error });
   if (session == undefined) return <RippleMultiLoader />;
 
   return (
@@ -30,12 +87,67 @@ const Home: FC<ReactNode> = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="main">
+      <main className={`main ${inter.className}`}>
         <Header />
-        <LoginButton />
-        <div className="channels__container">
-          <h3>Select from an existing channels</h3>
-          <div></div>
+
+        <div className="channel__container">
+          {!startCreateChannel ? (
+            <>
+              <h2>Select from an existing channels</h2>
+              <div className="channel__content">
+                {channels.map(channel => (
+                  <div className="channel__item" key={channel.id}>
+                    <span className="channel__image">
+                      <ChatChannelIcon />
+                    </span>
+                    <Link
+                      href={`/chats/${channel.key}`}
+                      passHref
+                      legacyBehavior
+                      className="channel__info"
+                    >
+                      <div className="channel__info">
+                        <p className="title">{channel.title}</p>
+                        <small className="key">{channel.key}</small>
+                      </div>
+                    </Link>
+                    {/* <div className="channel__info">
+                      <p className="title">{channel.title}</p>
+                      <small className="key">{channel.key}</small>
+                    </div> */}
+                  </div>
+                ))}
+              </div>
+              <hr className="hr__content" title="or" />
+              <div className="nextbutton">
+                <button onClick={() => setStartCreateChannel(true)}>
+                  Continue to a new create channel
+                </button>
+              </div>
+            </>
+          ) : (
+            <form onSubmit={handleCreateChannel}>
+              <h2>Create a new channel</h2>
+              <div className="channel__content createchannel">
+                {/* <h3>Create a new channel</h3> */}
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Enter the new channel name"
+                  onChange={e => setChannelName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="nextbutton">
+                <button onClick={() => setStartCreateChannel(false)}>
+                  Go back
+                </button>
+                <button type="submit" className="continue">
+                  Continue
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </main>
     </>
@@ -47,15 +159,15 @@ export default Home;
 export const getServerSideProps = async (context: any) => {
   const { req } = context;
   const session = await getSession({ req });
-
   if (!session?.user?.email) return { props: {} };
 
   const res = await fetch(
-    `${BASE}/channel/user-channels/${session.user.email}`
+    `${BASE}/channels/user-channels/${session.user.email}`
   );
-  const channels = await res.json();
-  console.log({ channels });
+  const usersChannels = await res.json();
+  const channels = usersChannels.channels;
+
   return {
-    props: {},
+    props: { channels, userId: usersChannels.id },
   };
 };

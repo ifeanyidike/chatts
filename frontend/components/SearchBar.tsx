@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { RiCloseCircleFill, RiSearch2Line } from 'react-icons/ri';
 
 const inter = Inter({ subsets: ['latin'] });
-const SearchBar = () => {
+interface Props {
+  activeTab: string;
+}
+const SearchBar = ({ activeTab }: Props) => {
   const [searchText, setSearchText] = useState<string>('');
   return (
     <div className={`searchbar ${inter.className}`}>

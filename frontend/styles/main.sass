@@ -9,17 +9,119 @@
     //     display: grid
     //     place-items: center
     //     border: 1px solid red
-    
 
+    .channel__container
+        width: 600px
+        margin: 0 auto
+
+        h2
+            font-weight: 500
+            margin: 80px 0 30px
+            font-size: 2rem
+
+        .channel__content
+            display: flex
+            flex-direction: column
+            gap: 10px
+            max-height: 400px
+            overflow: auto
+            
+            .channel__item
+                display: flex
+                cursor: pointer
+                align-items: center
+                background-color: #eee
+                padding: 20px
+                border-radius: 10px
+                
+                
+                .channel__image
+                    width: 40px
+                    height: 40px
+                    border-radius: 50%
+                    border: 1px solid #ddd
+                    display: flex
+                    align-items: center
+                    justify-content: center
+                    margin-right: 20px
+                
+                .channel__info
+                    .key
+                        font-size: 0.65rem
+                        color: #989595
+                    .title
+                        font-size: 1.3rem
+
+        h3
+            font-weight: 500
+            margin: 0px 0 30px
+            font-size: 2rem
+
+        .createchannel
+            display: flex
+            flex-direction: column
+            margin-top: 20px
+            input
+                border-radius: 5px
+                border: 2px solid #292323
+                padding: 12px
+                margin-bottom: 40px
+                width: 600px
+
+        .continue
+            background: #2f2c2c
+            color: #fff
+            
+                
+.nextbutton
+    display: flex
+    justify-content: space-around
+    button
+        border: none
+        border-radius: 30px
+        width: fit-content
+        padding: 20px 30px
+        color: #484646
+        margin: 0 auto
+        cursor: pointer
 
 .header
     background-color: #292323
     padding: 15px 45px
     font-size: 1.6rem
+    display: flex
+    justify-content: space-between
+    .header__right
+        display: flex
+        gap: 20px
+        .profile
+            width: 36px
+            height: 36px
+            border-radius: 50%
+            border: 1px solid #ddd
+            display: flex
+            align-items: center
+            justify-content: center
+            img
+                border-color: #fff
+                border-radius: 50%
+        .MuiSvgIcon-root
+            cursor: pointer
+
+        .MuiSvgIcon-root:hover:after
+            content: "Logout"
+            position: absolute
+            bottom: 0
+            color: white
+
+        .logout
+            font-size: 36px
+            color: #fff
     span:first-child
         color: #fff
     span:last-child
         color: #05b491
+        
 
 .signin
     min-height: 100vh
@@ -59,29 +161,68 @@
             background-color: #292323
             color: #fff
 
-        hr
-            border: 0
-            border-top: 1px solid #ccc
-            display: block
-            width: 100%
-            display: flex
-            justify-content: center
-            
-            margin: 1.5rem auto
-            overflow: visible
-           
-
-        hr:before
-            background: #fff
-            color: #888
-            content: "or"
-            padding: 0 0.4rem
-            position: relative
-            top: -0.6rem
-            font-size: 0.875rem
 
     .consent
         font-size: 0.68rem
         width: 270px
         margin-top: 12px
         color: #777474
+
+
+.tooltip 
+  display: inline
+  position: relative
+
+
+.tooltip:hover 
+  color: #c00
+  text-decoration: none
+
+
+.tooltip:hover:after 
+  background: #111
+  background: rgba(0, 0, 0, .8)
+  border-radius: .5em
+  bottom: 1.35em
+  color: #fff
+  content: attr(title)
+  display: block
+  left: 1em
+  padding: .3em 1em
+  position: absolute
+  text-shadow: 0 1px 0 #000
+  white-space: nowrap
+  z-index: 98
+
+
+.tooltip:hover:before 
+  border: solid
+  border-color: #111 transparent
+  border-color: rgba(0, 0, 0, .8) transparent
+  border-width: .4em .4em 0 .4em
+  bottom: 1em
+  content: ""
+  display: block
+  left: 2em
+  position: absolute
+  z-index: 99
+
+.hr__content 
+    border: 0
+    border-top: 1px solid #ccc
+    display: block
+    width: 100%
+    display: flex
+    justify-content: center
+            
+    margin: 1.5rem auto
+    overflow: visible
+           
+    &:before
+        background: #fff
+        color: #888
+        content: attr(title)
+        padding: 0 0.4rem
+        position: relative
+        top: -0.6rem
+        font-size: 0.875rem
