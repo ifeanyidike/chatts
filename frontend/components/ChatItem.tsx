@@ -7,10 +7,11 @@ interface Props {
   handleClick: () => void;
   isSelected: boolean;
   user: IUser;
+  isOnline: boolean;
 }
 const ChatItem = (props: Props) => {
   const date = new Date();
-
+  const isOnline: boolean = props.isOnline;
   const profileImage = props.user?.image || '/avatar.png';
   return (
     <div
@@ -19,6 +20,7 @@ const ChatItem = (props: Props) => {
     >
       <div className="chatitem__left">
         <div className="chatitem__profile-image">
+          <div className={`onlinestatus ${isOnline ? 'online' : ''}`}></div>
           <Image src={profileImage} width="42" height="42" alt="Avatar" />
         </div>
         <div className="chatitem__messageinfo">

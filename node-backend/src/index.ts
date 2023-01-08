@@ -9,6 +9,7 @@ import { nanoid } from 'nanoid';
 import Channel from './models/Channel';
 
 import ChannelRoutes from './routes/channels';
+import ChatCourseRoutes from './routes/chatcourses';
 import User from './models/User';
 
 const app = express();
@@ -30,6 +31,7 @@ const httpServer = createServer(app);
 app.use(express.json());
 // middlewares(app);
 app.use('/api/channels', ChannelRoutes);
+app.use('/api/chatcourse', ChatCourseRoutes);
 // app.use(params => middlewares({ ...params, app }));
 // app.use(params => middlewares(params, app));
 

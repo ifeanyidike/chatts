@@ -58,51 +58,55 @@ const SignInPage = (props: any) => {
     <div className={`signin ${inter.className}`}>
       <Header />
       <div className="signin__content">
-        {Object.values(providers).map(provider => {
-          return (
-            <form key={provider.name} onSubmit={e => handleSignIn(e, provider)}>
-              <input type="hidden" name="csrfToken" value={csrfToken} />
-              {provider.id === 'email' && (
-                <>
-                  <label htmlFor="input-email-for-email-provider">
-                    What&apos;s your email?
-                  </label>
-                  <input
-                    className="signin__input"
-                    id="input-email-for-email-provider"
-                    autoFocus
-                    type="email"
-                    name="email"
-                    placeholder="email@example.com"
-                    required
-                    onChange={e => setEmail(e.target.value)}
-                  ></input>
-                </>
-              )}
-              <button
-                className={`signin__button signin__${provider.id}`}
-                type="submit"
+        {providers &&
+          Object.values(providers).map(provider => {
+            return (
+              <form
+                key={provider.name}
+                onSubmit={e => handleSignIn(e, provider)}
               >
-                {provider.id === 'email' ? (
-                  'Continue'
-                ) : (
+                <input type="hidden" name="csrfToken" value={csrfToken} />
+                {provider.id === 'email' && (
                   <>
-                    <Image
-                      src={providerIcons[provider.id]}
-                      alt="provider"
-                      width="15"
-                      height="15"
-                    />
-                    Continue with {provider.name}
+                    <label htmlFor="input-email-for-email-provider">
+                      What&apos;s your email?
+                    </label>
+                    <input
+                      className="signin__input"
+                      id="input-email-for-email-provider"
+                      autoFocus
+                      type="email"
+                      name="email"
+                      placeholder="email@example.com"
+                      required
+                      onChange={e => setEmail(e.target.value)}
+                    ></input>
                   </>
                 )}
-              </button>
-              {provider.id === 'email' && (
-                <hr className="hr__content" title="or" />
-              )}
-            </form>
-          );
-        })}
+                <button
+                  className={`signin__button signin__${provider.id}`}
+                  type="submit"
+                >
+                  {provider.id === 'email' ? (
+                    'Continue'
+                  ) : (
+                    <>
+                      <Image
+                        src={providerIcons[provider.id]}
+                        alt="provider"
+                        width="15"
+                        height="15"
+                      />
+                      Continue with {provider.name}
+                    </>
+                  )}
+                </button>
+                {provider.id === 'email' && (
+                  <hr className="hr__content" title="or" />
+                )}
+              </form>
+            );
+          })}
         <p className="consent">
           By proceeding, you consent to the Chatts&lsquo; terms and conditions
           and privacy policies

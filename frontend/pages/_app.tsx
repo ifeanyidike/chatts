@@ -16,6 +16,8 @@ import type { AppProps } from 'next/app';
 import MainLayout from '../components/MainLayout';
 import { SessionProvider } from 'next-auth/react';
 import { SnackbarProvider } from 'notistack';
+import { Provider } from 'react-redux';
+import { store } from '../redux/store';
 
 export default function App({
   Component,
@@ -23,11 +25,13 @@ export default function App({
 }: AppProps) {
   return (
     <SessionProvider session={session}>
-      <SnackbarProvider maxSnack={1}>
-        <MainLayout>
-          <Component {...pageProps} />
-        </MainLayout>
-      </SnackbarProvider>
+      <Provider store={store}>
+        <SnackbarProvider maxSnack={1}>
+          <MainLayout>
+            <Component {...pageProps} />
+          </MainLayout>
+        </SnackbarProvider>
+      </Provider>
     </SessionProvider>
   );
 }

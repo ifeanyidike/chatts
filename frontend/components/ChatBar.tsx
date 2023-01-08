@@ -2,23 +2,22 @@ import React, { useState } from 'react';
 import ChatList from './ChatList';
 import SearchBar from './SearchBar';
 import { IUser } from '../interfaces/channeltypes';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 interface Props {
-  activeTab: string;
   users: IUser[];
   currentUser?: IUser;
   setCurrentUser: (e: IUser) => void;
 }
-const ChatBar = ({ activeTab, users, setCurrentUser, currentUser }: Props) => {
-  const [openedChat, setOpenedChat] = useState<undefined | number>(undefined);
+const ChatBar = ({ users, setCurrentUser, currentUser }: Props) => {
+  const tab = useSelector((state: RootState) => state.general.tab);
 
   return (
     <div className="chatbar">
-      <SearchBar activeTab={activeTab} />
+      <SearchBar activeTab={tab} />
       <ChatList
-        // setOpenedChat={setOpenedChat}
-        // openedChat={openedChat}
-        activeTab={activeTab}
+        activeTab={tab}
         users={users}
         currentUser={currentUser}
         setCurrentUser={setCurrentUser}

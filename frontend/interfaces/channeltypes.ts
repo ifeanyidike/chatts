@@ -25,3 +25,28 @@ export interface IUserChannels {
   updatedAt: string;
   users: IUser[];
 }
+
+export interface ICurrentCourse {
+  chatcourseId: string;
+  createdAt: string;
+  id: string;
+  updatedAt: string;
+  userId: string;
+}
+
+export interface ISocketUser {
+  name?: string;
+  email?: string;
+  image?: string;
+}
+
+export interface IChatMessage {
+  message?: string;
+  sender?: ISocketUser;
+  // receiver?: ISocketUser;
+  // isInIframe?: boolean;
+  // from?: string;
+  // type: string;
+  // courseId?: string;
+  createdAt?: Date;
+}

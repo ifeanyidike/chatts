@@ -28,11 +28,31 @@ const ChatCourse = sequelize.define(
   }
 );
 
+export const ChatCourseMember = sequelize.define(
+  'ChatCourseMember',
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    userId: {
+      type: DataTypes.UUID,
+    },
+    chatcourseId: {
+      type: DataTypes.UUID,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 Channel.hasMany(ChatCourse);
 ChatCourse.belongsTo(Channel);
 
-User.belongsToMany(ChatCourse, { through: 'ChatCourseMembers' });
-ChatCourse.belongsToMany(User, { through: 'ChatCourseMembers' });
+User.belongsToMany(ChatCourse, { through: ChatCourseMember });
+ChatCourse.belongsToMany(User, { through: ChatCourseMember });
 
 (async () => {
   await sequelize.sync();

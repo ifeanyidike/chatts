@@ -5,7 +5,7 @@
     overflow: auto
     background-color: #fbfbfb
     &.desktop-view
-      height: 78vh
+      height: 71vh
     .messagelist__typingindicator
       position: absolute
       bottom: 65px
@@ -22,3 +22,39 @@
           height: 15px
           margin: 0 1px
           // background-color: 
+
+    .message
+      padding: 25px
+      .message__content
+        display: flex
+        align-items: center
+        .message__image
+          margin-right: 10px
+          width: 30px
+          height: 30px
+          border-radius: 50%
+          border: 1px solid #ddd
+          display: flex
+          align-items: center
+          justify-content: center
+          img
+            border-color: #fff
+            border-radius: 50%
+            position: relative
+        .message__text
+          background-color: #ecebeb
+          padding: 8px
+          border-radius: 15px
+          border-bottom-right-radius: unset
+
+      
+      .message__time
+        font-size: 0.7rem
+        color: #b1b1b1
+
+      &.own-message
+        text-align: right
+        .message__content
+          flex-direction: row-reverse
+          .message__image
+            margin-left: 10px

@@ -1,16 +1,19 @@
 import { useSession } from 'next-auth/react';
+import router from 'next/router';
+import { RippleMultiLoader } from '../components/Loaders';
 
-export default function Admin() {
+export default function ProtectedRoute(props: any) {
   const { status } = useSession({
-    required: false,
+    required: true,
     onUnauthenticated() {
       // The user is not authenticated, handle it here.
+      router.replace('/');
     },
   });
 
   if (status === 'loading') {
-    return 'Loading or not authenticated...';
+    return <RippleMultiLoader />;
   }
 
-  return 'User is logged in';
+  return props.children;
 }

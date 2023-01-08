@@ -87,7 +87,11 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
             )}
           </div>
           <MessageList isInIframe={isInIframe} isTyping={isTyping} />
-          <MessageInput isInIframe={isInIframe} setIsTyping={setIsTyping} />
+          <MessageInput
+            isInIframe={isInIframe}
+            setIsTyping={setIsTyping}
+            from="serviceguest"
+          />
         </div>
       )}
     </>

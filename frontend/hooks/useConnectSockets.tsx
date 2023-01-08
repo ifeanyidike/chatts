@@ -14,7 +14,7 @@ const ConnectSockets = () => {
     const { key } = query;
     if (socketRef.current || !key) return;
 
-    socketRef.current = io(`${socketEndpoint}/${key}`);
+    socketRef.current = io(`${socketEndpoint}`, { autoConnect: false });
   }, [query]);
 
   useEffect(() => {
@@ -22,10 +22,19 @@ const ConnectSockets = () => {
     setSocket(socketRef.current);
   }, [socketRef]);
 
+  // useEffect(() => {
+  //   console.log({ socket });
+  //   socket?.once('connect', () => {
+  //     console.log(socket.id);
+  //   });
+  // }, [socket]);
+
   useEffect(() => {
-    console.log({ socket });
-    socket?.on('connect', () => {
-      console.log(socket.id);
+    socket?.on('connect_error', err => {
+      if (err.message === 'invalid user') {
+        console.log('User is not valid');
+        socket.off('connect_error');
+      }
     });
   }, [socket]);
 

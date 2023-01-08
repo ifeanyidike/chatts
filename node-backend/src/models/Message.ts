@@ -20,14 +20,30 @@ const Message = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    coursetitle: {
+      type: DataTypes.STRING,
+    },
+    type: {
+      type: DataTypes.ENUM,
+      values: ['direct', 'group', 'service'],
+      allowNull: false,
+    },
+    isRead: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isDelivered: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-Channel.hasMany(Message);
-Message.belongsTo(Channel);
+Channel.hasMany(ChatCourse);
+ChatCourse.belongsTo(Channel);
 
 ChatCourse.hasMany(Message);
 Message.belongsTo(ChatCourse);

@@ -19,9 +19,23 @@
             display: flex
             align-items: center
             justify-content: center
+            position: relative
             img
                 border-color: #fff
                 border-radius: 50%
+            .onlinestatus
+                position: absolute
+                top: -1px
+                right: 3px
+                border-radius: 50%
+
+                background-color: #8d8d8d
+                width: 10px
+                height: 10px
+                &.online
+                    background-color: #10df59
+
+            
         
         .chatitem__messageinfo
             margin-left: 5px
