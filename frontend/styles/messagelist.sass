@@ -28,6 +28,7 @@
       .message__content
         display: flex
         align-items: center
+        position: relative
         .message__image
           margin-right: 10px
           width: 30px
@@ -46,6 +47,18 @@
           padding: 8px
           border-radius: 15px
           border-bottom-right-radius: unset
+
+        .message__more
+          display: none
+          cursor: pointer
+          color: #a1a0a0
+
+      .message__content:hover 
+        .message__more
+          display: block
+        
+        
+        
 
       
       .message__time

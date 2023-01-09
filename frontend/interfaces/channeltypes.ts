@@ -1,12 +1,12 @@
 export interface IUser {
   ChannelUsers?: IChannelUsers;
-  createdAt?: string;
+  createdAt?: Date;
   email?: string;
   emailVerified?: string;
   id?: string;
   image?: string;
   name?: string;
-  updatedAt?: string;
+  updatedAt?: Date;
 }
 
 export interface IChannelUsers {
@@ -27,8 +27,11 @@ export interface IUserChannels {
 }
 
 export interface ICurrentCourse {
-  chatcourseId: string;
+  chatcourseId?: string;
   createdAt: string;
+  title?: string;
+  tags?: string;
+  channelKey?: string;
   id: string;
   updatedAt: string;
   userId: string;
@@ -41,12 +44,23 @@ export interface ISocketUser {
 }
 
 export interface IChatMessage {
-  message?: string;
-  sender?: ISocketUser;
+  id: string;
+  isRead: boolean;
+  isDelivered: boolean;
+  text: string;
+  html: string;
+  updatedAt: Date;
+  createdAt: Date;
+  chatcourseId: string;
+  userId: string;
+  chatcourse: ICurrentCourse;
+  user: IUser;
+  // message?: string;
+  // sender?: ISocketUser;
   // receiver?: ISocketUser;
   // isInIframe?: boolean;
   // from?: string;
   // type: string;
   // courseId?: string;
-  createdAt?: Date;
+  // createdAt?: Date;
 }

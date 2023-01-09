@@ -2,6 +2,7 @@ import { Server as SocketServer, Socket } from 'socket.io';
 import { IncomingMessage, ServerResponse, Server as HttpServer } from 'http';
 import User from '../models/User';
 import Message from '../models/Message';
+import ChatCourse from '../models/chatcourse';
 
 //  io.of(/\w*([\W\w])/g).on('connection', socket => {
 //     const namespaceSocket = socket.nsp;
@@ -46,35 +47,56 @@ const initializeSocket = (
     return next();
   });
 
+  let onlineUsers: any = {};
+
   io.on('connection', async (socket: any) => {
-    let onlineUsers: any = {};
+    const channelId = socket.channel;
+
     socket.join(socket.channel);
-    for (let [id, s] of io.of('/').sockets) {
-      const socketValue: any = s;
-      const channelId: string = socketValue.channel;
-      if (!onlineUsers.hasOwnProperty(channelId)) {
-        onlineUsers[channelId] = [];
-      }
 
-      const userExists = onlineUsers[channelId].some(
-        (user: any) => user.email === socketValue.userEmail
-      );
-
-      if (!userExists) {
-        onlineUsers[channelId] = [
-          ...onlineUsers[channelId],
-          {
-            ...s.handshake.auth.user,
-          },
-        ];
-      }
-
-      // onlineUsers.push({
-      //   socketId: id,
-      //   ...s.handshake.auth,
-      // });
-      // console.log({ id }, s.handshake.auth);
+    if (!onlineUsers.hasOwnProperty(channelId)) {
+      onlineUsers[channelId] = [];
     }
+
+    const userExists = onlineUsers[channelId].some(
+      (user: any) => user.email === socket.userEmail
+    );
+
+    if (!userExists) {
+      onlineUsers[channelId] = [
+        ...onlineUsers[channelId],
+        {
+          ...socket.handshake.auth.user,
+        },
+      ];
+    }
+
+    // for (let [id, s] of io.of('/').sockets) {
+    //   const socketValue: any = s;
+    //   const channelId: string = socketValue.channel;
+    //   if (!onlineUsers.hasOwnProperty(channelId)) {
+    //     onlineUsers[channelId] = [];
+    //   }
+
+    //   const userExists = onlineUsers[channelId].some(
+    //     (user: any) => user.email === socketValue.userEmail
+    //   );
+
+    //   if (!userExists) {
+    //     onlineUsers[channelId] = [
+    //       ...onlineUsers[channelId],
+    //       {
+    //         ...s.handshake.auth.user,
+    //       },
+    //     ];
+    //   }
+
+    //   // onlineUsers.push({
+    //   //   socketId: id,
+    //   //   ...s.handshake.auth,
+    //   // });
+    //   // console.log({ id }, s.handshake.auth);
+    // }
 
     // const socketKinds = io.in(socket.channel);
     // const socketUsers = await socketKinds.fetchSockets();
@@ -123,24 +145,44 @@ const initializeSocket = (
         courseId: data.courseId,
         createdAt: data.createdAt,
       };
-      socket.broadcast.emit('onReceiveMessage', outputData);
+      // io.to(channelId).emit('onReceiveMessage', outputData);
       // const newUser = await User.create({
       //   firstName: 'Ifeanyi',
       //   lastName: 'Dike',
       //   email: 'ifeanyidike87@gmail.com',
       // });
       // console.log({ newUser });
-      // const message = await Message.create({
-      //   text: data.message,
-      //   html: `<p>${data.message}</p>`,
-      // });
+      const message: any = await Message.create({
+        text: data.message,
+        html: `<p>${data.message}</p>`,
+      });
+      const chatCourse: any = await ChatCourse.findOne({
+        where: { id: data.courseId },
+      });
+      const user: any = await User.findOne({
+        where: { email: data.sender.email },
+      });
+
+      await chatCourse?.addMessage(message);
+      await user?.addMessage(message);
+
+      const jsonMessage = message.toJSON();
+      const jsonChatCourse = chatCourse.toJSON();
+      const jsonUser = user.toJSON();
+
+      jsonMessage.chatcourseId = jsonChatCourse.id;
+      jsonMessage.userId = jsonUser.id;
+      jsonMessage.chatcourse = jsonChatCourse;
+      jsonMessage.user = jsonUser;
+
+      io.to(channelId).emit('onReceiveMessage', jsonMessage);
+      // console.log(jsonMessage);
     });
     socket.on('isTyping', (data: any) => {
       socket.broadcast.emit('onUserTyping', data);
     });
 
     socket.on('disconnect', async () => {
-      const channelId = socket.channel;
       const userEmail = socket.userEmail;
       const allSockets = await io.in(channelId).fetchSockets();
 

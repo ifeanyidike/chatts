@@ -19,7 +19,7 @@ export const NoUserSelectedMessagePane = dynamic(
 );
 
 import { IChatMessage, IUser } from '../interfaces/channeltypes';
-import { BASE, noAuthPoster } from '../utils/appUtil';
+import { BASE, noAuthFetcher, noAuthPoster } from '../utils/appUtil';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useSession } from 'next-auth/react';
@@ -50,6 +50,17 @@ const MesagePane = (props: Props) => {
     activeTab ? `${BASE}/chatcourse` : null,
     noAuthPoster
   );
+
+  const course = currentCourse?.length ? currentCourse[0] : null;
+
+  const { data, error } = useSWR(
+    course?.chatcourseId ? `${BASE}/messages/${course.chatcourseId}` : null,
+    course?.chatcourseId ? noAuthFetcher : null
+  );
+
+  useEffect(() => {
+    setMessages(data || []);
+  }, [data]);
 
   useEffect(() => {
     if (!activeTab || !currentUser?.email || !user?.email || !query.key) return;

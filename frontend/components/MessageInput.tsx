@@ -78,16 +78,8 @@ const MessageInput = (props: Props) => {
       courseId,
       createdAt: new Date(),
     });
-    const formattedMessage: any = {
-      message,
-      sender: user,
-      createdAt: new Date(),
-    };
-    props.setMessages([...props.messages, formattedMessage]);
-    // props.scrollTargetRef.current.scrollTop =
-    //   props.scrollTargetRef?.current?.scrollHeight + 1000;
-    props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
 
+    props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
     setMessage('');
   };
 
@@ -113,7 +105,10 @@ const MessageInput = (props: Props) => {
     >
       {openEmoji && (
         <div className="emojipicker">
-          <Picker data={data} onEmojiSelect={console.log} />
+          <Picker
+            data={data}
+            onEmojiSelect={(e: any) => setMessage(`${message + e.native}`)}
+          />
         </div>
       )}
       <EmojiIcon

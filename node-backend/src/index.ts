@@ -10,6 +10,7 @@ import Channel from './models/Channel';
 
 import ChannelRoutes from './routes/channels';
 import ChatCourseRoutes from './routes/chatcourses';
+import MessageRoutes from './routes/messages';
 import User from './models/User';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(express.json());
 // middlewares(app);
 app.use('/api/channels', ChannelRoutes);
 app.use('/api/chatcourse', ChatCourseRoutes);
+app.use('/api/messages', MessageRoutes);
 // app.use(params => middlewares({ ...params, app }));
 // app.use(params => middlewares(params, app));
 

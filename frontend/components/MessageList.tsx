@@ -1,10 +1,4 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-  useRef,
-} from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useSocket } from './SocketProvider';
 import {
   IChatMessage,
@@ -16,10 +10,11 @@ import router from 'next/router';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import Image from 'next/image';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 interface Props {
-  isTyping: undefined | boolean;
-  isInIframe: undefined | boolean;
+  isTyping?: boolean;
+  isInIframe?: boolean;
   currentUser?: IUser;
   currentCourse?: ICurrentCourse[];
   setMessages: Dispatch<SetStateAction<IChatMessage[]>>;
@@ -38,7 +33,7 @@ const MessageList = (props: Props) => {
   const [userTyping, setUserTyping] = useState<IUserTyping>({});
   const { data: session } = useSession();
   const tab = useSelector((state: RootState) => state.general.tab);
-  const { key } = router.query;
+
   const course = props.currentCourse?.length ? props.currentCourse[0] : null;
 
   const user = session?.user || {
@@ -69,26 +64,11 @@ const MessageList = (props: Props) => {
 
   useEffect(() => {
     if (!socket) return;
-    // message: data.message,
-    //     receiver: data.receiver,
-    //     sender: data.sender,
-    //     type: data.type,
-    //     courseId: data.courseId,
     socket.on('onReceiveMessage', (data: any) => {
-      const { message, receiver, sender, type, courseId, createdAt } = data;
-
-      if (
-        course?.chatcourseId !== courseId ||
-        receiver.email !== session?.user?.email ||
-        type !== tab
-      ) {
+      if (course?.chatcourseId !== data.chatcourseId) {
         return;
       }
-      const formattedMessage: IChatMessage = {
-        message,
-        sender,
-        createdAt,
-      };
+      const formattedMessage: IChatMessage = data;
 
       setMessages([...messages, formattedMessage]);
 
@@ -97,11 +77,7 @@ const MessageList = (props: Props) => {
       props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket, key, session, messages, tab, course]);
-
-  useEffect(() => {
-    console.log({ messages });
-  }, [messages]);
+  }, [socket, session, messages, tab, course]);
 
   const formatTime = (d: Date) => {
     var h = d.getHours();
@@ -130,20 +106,21 @@ const MessageList = (props: Props) => {
       className={`messagelist ${!isInIframe ? 'desktop-view' : 'iframe-view'}`}
     >
       <>
-        {messages.map((data, idx) => {
-          const userImage = data?.sender?.image || '/avatar.png';
+        {messages?.map(data => {
+          const userImage = data?.user?.image || '/avatar.png';
           const currentTime = data.createdAt;
           return (
             <div
-              key={idx}
+              key={data.id}
               className={`message ${
-                data.sender?.email === user?.email ? 'own-message' : ''
+                data.user?.email === user?.email ? 'own-message' : ''
               }`}
             >
               <div className="message__content">
                 <MessageItemImage userImage={userImage} />
 
-                <p className="message__text">{data.message}</p>
+                <p className="message__text">{data.text}</p>
+                <MoreHorizIcon className="message__more" />
               </div>
               <small className="message__time">
                 {currentTime ? formattedDateTime(currentTime) : null}

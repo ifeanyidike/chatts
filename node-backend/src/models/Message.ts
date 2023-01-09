@@ -20,14 +20,6 @@ const Message = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    coursetitle: {
-      type: DataTypes.STRING,
-    },
-    type: {
-      type: DataTypes.ENUM,
-      values: ['direct', 'group', 'service'],
-      allowNull: false,
-    },
     isRead: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
