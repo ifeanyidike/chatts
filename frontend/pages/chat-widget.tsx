@@ -11,6 +11,7 @@ import MessageInput from '../components/MessageInput';
 import MessageList from '../components/MessageList';
 import { useSession } from 'next-auth/react';
 import { IChatMessage } from '../interfaces/channeltypes';
+import { io, Socket } from 'socket.io-client';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,8 +21,13 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
   const [isTyping, setIsTyping] = useState<undefined | boolean>(undefined);
   const [messages, setMessages] = useState<IChatMessage[]>([]);
   const scrollTargetRef = useRef() as React.MutableRefObject<HTMLDivElement>;
-  const { socket } = useSocket();
+  let { socket } = useSocket();
   const { data: session } = useSession();
+  const [widgetUser, setWidgetUser] = useState({
+    email: undefined,
+    image: undefined,
+    name: 'Guest',
+  });
 
   const router = useRouter();
   const { key } = router.query;
@@ -67,15 +73,19 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
 
   // if (data !== undefined && !data)
   //   throw new Error('Invalid authorization code');
-  console.log({ socket });
+  // console.log({ socket });
 
   useEffect(() => {
-    //  if (!session?.user?.email || !key || !socket) return;
-    //  socket.auth = { user: session.user, channel: key };
+    if (!key || !socket) return;
+    socket.auth = {
+      user: widgetUser,
+      channel: key,
+      isCustomer: window.location.pathname.includes('chat-widget'),
+    };
 
-    socket?.connect();
-    console.log(socket);
-  }, [socket]);
+    socket.connect();
+  }, [socket, widgetUser, key]);
+
   return (
     <>
       {!openWidget() ? (

@@ -11,16 +11,19 @@ const ConnectSockets = () => {
   const { query } = router;
 
   useEffect(() => {
-    const { key } = query;
-    if (socketRef.current || !key) return;
+    if (socketRef.current) return;
 
     socketRef.current = io(`${socketEndpoint}`, { autoConnect: false });
-  }, [query]);
+  }, []);
 
   useEffect(() => {
     if (!socketRef.current) return;
     setSocket(socketRef.current);
   }, [socketRef]);
+
+  useEffect(() => {
+    socket?.onAny(e => console.log(e));
+  }, [socket]);
 
   // useEffect(() => {
   //   console.log({ socket });

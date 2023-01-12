@@ -34,7 +34,7 @@ const ChatView = (props: Props) => {
   const router = useRouter();
   const { query } = router;
   const { key } = query;
-  console.log(users);
+
   const { trigger } = useSWRMutation(
     key ? `${BASE}/channels/${key}` : null,
     noAuthPutter

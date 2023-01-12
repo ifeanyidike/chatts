@@ -50,16 +50,43 @@
 
         .message__more
           display: none
+        .message__more__others
           cursor: pointer
           color: #a1a0a0
+
+        .clickoutside
+          display: flex
+          align-items: center
+          position: relative
+          >div
+            display: flex
+            flex-direction: column
+            position: absolute
+            left: 25px
+            top: 5px
+            font-size: 0.75rem
+            width: 100px
+            padding: 6px 0
+            
+            box-shadow: 0 1px 5px rgb(0 0 0 / 0.1)
+            border-radius: 15px
+            border-bottom-left-radius: unset
+            span
+              padding: 6px 10px
+              border-bottom: 1px solid #e2e1e1
+              cursor: pointer
+              &:hover
+                color: blue
+              &:last-child
+                border-bottom: none
+                padding-bottom: 0
+
+          
 
       .message__content:hover 
         .message__more
           display: block
-        
-        
-        
-
+                
       
       .message__time
         font-size: 0.7rem
@@ -69,5 +96,12 @@
         text-align: right
         .message__content
           flex-direction: row-reverse
+          text-align: left
           .message__image
             margin-left: 10px
+          .clickoutside
+            flex-direction: row-reverse
+            >div
+              left: -100px
+              border-bottom-right-radius: unset
+              border-bottom-left-radius: 15px

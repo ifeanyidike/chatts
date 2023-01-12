@@ -16,6 +16,7 @@ import {
   ICurrentCourse,
   IUser,
 } from '../interfaces/channeltypes';
+import ClickOutside from '../components/ClickOutside';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useSession } from 'next-auth/react';
@@ -104,12 +105,14 @@ const MessageInput = (props: Props) => {
       className={`messageinput ${!isInIframe ? 'desktop-view' : 'iframe-view'}`}
     >
       {openEmoji && (
-        <div className="emojipicker">
-          <Picker
-            data={data}
-            onEmojiSelect={(e: any) => setMessage(`${message + e.native}`)}
-          />
-        </div>
+        <ClickOutside handleClick={() => setOpenEmoji(false)}>
+          <div className="emojipicker">
+            <Picker
+              data={data}
+              onEmojiSelect={(e: any) => setMessage(`${message + e.native}`)}
+            />
+          </div>
+        </ClickOutside>
       )}
       <EmojiIcon
         className="emojiopener"
