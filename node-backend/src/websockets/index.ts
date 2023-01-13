@@ -3,6 +3,7 @@ import { IncomingMessage, ServerResponse, Server as HttpServer } from 'http';
 import User from '../models/User';
 import Message from '../models/Message';
 import ChatCourse from '../models/chatcourse';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 //  io.of(/\w*([\W\w])/g).on('connection', socket => {
 //     const namespaceSocket = socket.nsp;
@@ -37,13 +38,21 @@ const initializeSocket = (
   });
 
   io.use((socket: any, next) => {
-    const { user, channel } = socket.handshake.auth;
+    const { user, channel, isCustomer, location } = socket.handshake.auth;
 
-    if (!user.email || (!user.email && user.name !== 'Guest')) {
+    if (!user.email && user.name !== 'Guest') {
       return next(new Error('invalid user'));
     }
+
+    if (isCustomer) {
+      socket.location = location;
+    }
+
+    socket.user = user;
     socket.userEmail = user.email;
     socket.channel = channel;
+    socket.isGuest = user.name === 'Guest';
+    socket.isCustomer = isCustomer;
     return next();
   });
 
@@ -137,14 +146,6 @@ const initializeSocket = (
       // type: props.from === 'serviceguest' ? 'service' : tab,
       // courseId,
 
-      const outputData = {
-        message: data.message,
-        receiver: data.receiver,
-        sender: data.sender,
-        type: data.type,
-        courseId: data.courseId,
-        createdAt: data.createdAt,
-      };
       // io.to(channelId).emit('onReceiveMessage', outputData);
       // const newUser = await User.create({
       //   firstName: 'Ifeanyi',
@@ -152,31 +153,13 @@ const initializeSocket = (
       //   email: 'ifeanyidike87@gmail.com',
       // });
       // console.log({ newUser });
-      const message: any = await Message.create({
-        text: data.message,
-        html: `<p>${data.message}</p>`,
-      });
-      const chatCourse: any = await ChatCourse.findOne({
-        where: { id: data.courseId },
-      });
-      const user: any = await User.findOne({
-        where: { email: data.sender.email },
-      });
 
-      await chatCourse?.addMessage(message);
-      await user?.addMessage(message);
-
-      const jsonMessage = message.toJSON();
-      const jsonChatCourse = chatCourse.toJSON();
-      const jsonUser = user.toJSON();
-
-      jsonMessage.chatcourseId = jsonChatCourse.id;
-      jsonMessage.userId = jsonUser.id;
-      jsonMessage.chatcourse = jsonChatCourse;
-      jsonMessage.user = jsonUser;
-
-      io.to(channelId).emit('onReceiveMessage', jsonMessage);
       // console.log(jsonMessage);
+      if (socket.isGuest || !socket.channel) {
+        await sendMessageToGuestUsers(io, socket, channelId, data);
+      } else {
+        await sendMessageToNonGuestUsers(io, socket, channelId, data);
+      }
     });
     socket.on('isTyping', (data: any) => {
       socket.broadcast.emit('onUserTyping', data);
@@ -209,6 +192,65 @@ const initializeSocket = (
       }
     });
   });
+};
+
+const sendMessageToNonGuestUsers = async (
+  io: SocketServer<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  socket: any,
+  channelId: string,
+  data: IMessageData
+) => {
+  const message: any = await Message.create({
+    text: data.message,
+    html: `<p>${data.message}</p>`,
+  });
+  const chatCourse: any = await ChatCourse.findOne({
+    where: { id: data.courseId },
+  });
+  const user: any = await User.findOne({
+    where: { email: socket.userEmail },
+  });
+
+  await chatCourse?.addMessage(message);
+  await user?.addMessage(message);
+
+  const jsonMessage = message.toJSON();
+  const jsonChatCourse = chatCourse.toJSON();
+  const jsonUser = user.toJSON();
+
+  jsonMessage.chatcourseId = jsonChatCourse.id;
+  jsonMessage.userId = jsonUser.id;
+  jsonMessage.chatcourse = jsonChatCourse;
+  jsonMessage.user = jsonUser;
+
+  io.to(channelId).emit('onReceiveMessage', jsonMessage);
+};
+
+const sendMessageToGuestUsers = async (
+  io: SocketServer<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  socket: any,
+  channelId: string,
+  data: IMessageData
+) => {
+  // const outputData = {
+  //   message: data.message,
+  //   receiver: data.receiver,
+  //   sender: data.sender,
+  //   type: data.type,
+  //   courseId: data.courseId,
+  //   createdAt: data.createdAt,
+  // };
+  // const text = data.message;
+  const outputData = {
+    text: data.message,
+    sender: socket.user,
+    location: socket.location,
+    type: data.type,
+    courseId: data.courseId,
+    createdAt: data.createdAt,
+  };
+
+  io.to(channelId).emit('onReceiveServiceMessage', outputData);
 };
 
 export default initializeSocket;
