@@ -66,7 +66,6 @@ const MessageInput = (props: Props) => {
 
     socket.emit('onSendMessage', {
       message,
-      sender: user,
       receiver: {
         name: currentUser?.name,
         email: currentUser?.email,

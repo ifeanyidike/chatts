@@ -10,7 +10,7 @@ import { BASE, noAuthFetcher } from '../utils/appUtil';
 import MessageInput from '../components/MessageInput';
 import MessageList from '../components/MessageList';
 import { useSession } from 'next-auth/react';
-import { IChatMessage } from '../interfaces/channeltypes';
+import { IChatMessage, IUser } from '../interfaces/channeltypes';
 import { io, Socket } from 'socket.io-client';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -23,14 +23,15 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
   const scrollTargetRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   let { socket } = useSocket();
   const { data: session } = useSession();
-  const [widgetUser, setWidgetUser] = useState({
+  const [widgetUser, setWidgetUser] = useState<IUser>({
+    id: undefined,
     email: undefined,
     image: undefined,
     name: 'Guest',
   });
 
   const router = useRouter();
-  const { key } = router.query;
+  const { key, location } = router.query;
 
   const { data, error } = useSWR(
     key ? `${BASE}/channels/${key}` : null,
@@ -53,12 +54,24 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
 
   useEffect(() => {
     bindEvent(window, 'message', function (e) {
-      // console.log('message from widget', e);
+      console.log('message from widget', e);
     });
     window.addEventListener('message', e => {
       // console.log('message', e);
     });
   }, [widgetOpen]);
+
+  useEffect(() => {
+    if (!widgetUser.email) {
+      const newWidgetUser = { ...widgetUser };
+      const userId =
+        localStorage.getItem('widgetUserId') || window.crypto.randomUUID();
+      localStorage.setItem('widgetUserId', userId);
+      newWidgetUser.id = userId;
+      setWidgetUser(newWidgetUser);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [widgetUser.email, location]);
 
   useEffect(() => {
     if (widgetOpen === undefined) return;
@@ -76,15 +89,16 @@ const ChatWidget: FC<ReactNode> = (props: any) => {
   // console.log({ socket });
 
   useEffect(() => {
-    if (!key || !socket) return;
+    if (!key || !location || !socket) return;
     socket.auth = {
       user: widgetUser,
       channel: key,
+      location,
       isCustomer: window.location.pathname.includes('chat-widget'),
     };
 
     socket.connect();
-  }, [socket, widgetUser, key]);
+  }, [socket, widgetUser, key, location]);
 
   return (
     <>
