@@ -62,12 +62,10 @@ export const addUserToChannel = async (req: any, res: any, next: any) => {
   try {
     const { key } = req.params;
     const { userEmail } = req.body;
-    console.log({ userEmail });
     const currentChannel: any = await Channel.findOne({ where: { key } });
     const currentUser = await User.findOne({ where: { email: userEmail } });
 
     const updatedChannel = await currentChannel?.addUser(currentUser);
-    console.log({ updatedChannel });
 
     // const channel = await Channel.findOne({ where: { key }, include: User });
 

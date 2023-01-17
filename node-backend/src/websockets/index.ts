@@ -1,3 +1,4 @@
+import { Express } from 'express';
 import { Server as SocketServer, Socket } from 'socket.io';
 import { IncomingMessage, ServerResponse, Server as HttpServer } from 'http';
 import User from '../models/User';
@@ -10,6 +11,7 @@ import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 //     const namespace = namespaceSocket.name.substring(1);
 
 interface IUser {
+  id?: string;
   name: string;
   email: string;
   image: string;
@@ -27,7 +29,8 @@ interface IMessageData {
 }
 
 const initializeSocket = (
-  httpServer: HttpServer<typeof IncomingMessage, typeof ServerResponse>
+  httpServer: HttpServer<typeof IncomingMessage, typeof ServerResponse>,
+  app: Express
 ) => {
   const io = new SocketServer(httpServer, {
     cors: {
@@ -35,6 +38,11 @@ const initializeSocket = (
       allowedHeaders: ['my-custom-header'],
       credentials: true,
     },
+  });
+
+  app.use((req: any, res: any, next: Function) => {
+    req.io = io;
+    return next();
   });
 
   io.use((socket: any, next) => {
@@ -138,6 +146,7 @@ const initializeSocket = (
     // });
 
     socket.on('onSendMessage', async (data: IMessageData) => {
+      console.log({ data }, socket);
       // message,
       // senderEmail: user?.email,
       // receiverEmail: props.currentUser?.email,
@@ -155,7 +164,7 @@ const initializeSocket = (
       // console.log({ newUser });
 
       // console.log(jsonMessage);
-      if (socket.isGuest || !socket.channel) {
+      if (socket.isGuest || !data.courseId) {
         await sendMessageToGuestUsers(io, socket, channelId, data);
       } else {
         await sendMessageToNonGuestUsers(io, socket, channelId, data);
@@ -182,9 +191,7 @@ const initializeSocket = (
         );
         onlineUsers = {
           ...onlineUsers,
-          channelId: {
-            ...newChannelOnlineUsers,
-          },
+          [channelId]: [...newChannelOnlineUsers],
         };
 
         // notify other users
@@ -200,30 +207,36 @@ const sendMessageToNonGuestUsers = async (
   channelId: string,
   data: IMessageData
 ) => {
-  const message: any = await Message.create({
-    text: data.message,
-    html: `<p>${data.message}</p>`,
-  });
-  const chatCourse: any = await ChatCourse.findOne({
-    where: { id: data.courseId },
-  });
-  const user: any = await User.findOne({
-    where: { email: socket.userEmail },
-  });
+  try {
+    const message: any = await Message.create({
+      text: data.message,
+      html: `<p>${data.message}</p>`,
+    });
+    const chatCourse: any = await ChatCourse.findOne({
+      where: { id: data.courseId },
+    });
 
-  await chatCourse?.addMessage(message);
-  await user?.addMessage(message);
+    const user: any = await User.findOne({
+      where: { email: socket.userEmail },
+    });
 
-  const jsonMessage = message.toJSON();
-  const jsonChatCourse = chatCourse.toJSON();
-  const jsonUser = user.toJSON();
+    await chatCourse?.addMessage(message);
+    await user?.addMessage(message);
 
-  jsonMessage.chatcourseId = jsonChatCourse.id;
-  jsonMessage.userId = jsonUser.id;
-  jsonMessage.chatcourse = jsonChatCourse;
-  jsonMessage.user = jsonUser;
+    const jsonMessage = message.toJSON();
+    const jsonChatCourse = chatCourse.toJSON();
+    const jsonUser = user.toJSON();
 
-  io.to(channelId).emit('onReceiveMessage', jsonMessage);
+    jsonMessage.chatcourseId = jsonChatCourse.id;
+    jsonMessage.userId = jsonUser.id;
+    jsonMessage.chatcourse = jsonChatCourse;
+    jsonMessage.user = jsonUser;
+    jsonMessage.type = data.type;
+
+    io.to(channelId).emit('onReceiveMessage', jsonMessage);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const sendMessageToGuestUsers = async (
@@ -244,7 +257,8 @@ const sendMessageToGuestUsers = async (
   const outputData = {
     text: data.message,
     sender: socket.user,
-    location: socket.location,
+    guestId: socket.user?.id || data?.receiver?.id,
+    location: socket.location || data?.receiver?.name,
     type: data.type,
     courseId: data.courseId,
     createdAt: data.createdAt,

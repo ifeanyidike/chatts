@@ -4,14 +4,16 @@ import ChatCourse, { ChatCourseMember } from '../models/chatcourse';
 import User from '../models/User';
 
 export const createCourse = async (req: any, res: any, next: Function) => {
-  const { members, activeTab, channelKey } = req.body;
-  const formattedMembers = members.map((m: string) => {
-    return {
-      email: m,
-    };
-  });
+  const { members, activeTab, channelKey, name } = req.body;
 
-  // console.log({ formattedMembers });
+  if (activeTab === 'service') {
+    const chatCourse = await ChatCourse.findOne({
+      where: { title: name },
+    });
+
+    if (chatCourse) return res.status(200).json(chatCourse);
+  }
+
   const users = await User.findAll({
     where: {
       email: members,
@@ -39,4 +41,19 @@ export const createCourse = async (req: any, res: any, next: Function) => {
 
   return res.status(200).json(createdCourse);
   // const courses = await ChatCourse.findOne();
+};
+
+export const getCoursesByChannel = async (
+  req: any,
+  res: any,
+  next: Function
+) => {
+  const { key } = req.params;
+  const { type } = req.query;
+
+  const chatCourse = await ChatCourse.findAll({
+    where: { channelKey: key, type },
+    include: User,
+  });
+  res.status(200).json(chatCourse);
 };

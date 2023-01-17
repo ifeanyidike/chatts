@@ -11,6 +11,7 @@ import Channel from './models/Channel';
 import ChannelRoutes from './routes/channels';
 import ChatCourseRoutes from './routes/chatcourses';
 import MessageRoutes from './routes/messages';
+import UserRoutes from './routes/users';
 import User from './models/User';
 
 const app = express();
@@ -34,6 +35,7 @@ app.use(express.json());
 app.use('/api/channels', ChannelRoutes);
 app.use('/api/chatcourse', ChatCourseRoutes);
 app.use('/api/messages', MessageRoutes);
+app.use('/api/users', UserRoutes);
 // app.use(params => middlewares({ ...params, app }));
 // app.use(params => middlewares(params, app));
 
@@ -70,7 +72,7 @@ app.use('/api/messages', MessageRoutes);
 //   console.log({ channelMember });
 // })();
 
-initializeSocket(httpServer);
+initializeSocket(httpServer, app);
 
 app.use(express.static(__dirname + '/scripts'));
 

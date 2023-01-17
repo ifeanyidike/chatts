@@ -1,5 +1,4 @@
 (function (d, w) {
-  console.log(w.location);
   let iframe = d.createElement('iframe'),
     src = new URL(d.currentScript.src),
     s = d.createElement('link');

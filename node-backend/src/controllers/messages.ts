@@ -19,6 +19,7 @@ export const getCourseMessages = async (req: any, res: any, next: Function) => {
     const messages = await Message.findAll({
       where: { chatcourseId },
       include: [User, ChatCourse],
+      order: [['createdAt', 'ASC']],
     });
     res.status(200).json(messages);
   } catch (error) {
