@@ -30,11 +30,21 @@
         cursor: pointer
         gap: 30px
 
-
+        span
+            position: relative
         span>svg
             font-size: 20px
 
         span.active
             svg
                 color: #4866d2
+        span.has-flag::after
+            content: ''
+            position: absolute
+            top: 0
+            right: -3px
+            background-color: #d8ab09
+            width: 8px
+            height: 8px
+            border-radius: 50%
 

@@ -3,24 +3,37 @@ import Image from 'next/image';
 import { IoMdChatboxes } from 'react-icons/io';
 import { AiOutlineLineChart } from 'react-icons/ai';
 import { FiSettings } from 'react-icons/fi';
-import { IoBookmarksOutline } from 'react-icons/all';
+import { BsBookmarks } from 'react-icons/bs';
 import { RiCustomerService2Fill } from 'react-icons/ri';
 import { HiOutlineUserGroup } from 'react-icons/hi';
 import BookmarksOutlinedIcon from '@mui/icons-material/BookmarksOutlined';
 import { useSession } from 'next-auth/react';
 import type { RootState } from '../redux/store';
 import { useSelector, useDispatch } from 'react-redux';
-import { toggleTab } from '../redux/slices/general';
+import { setMessageFlag, toggleTab } from '../redux/slices/general';
 
-const Sidebar = () => {
+interface Props {
+  isAdmin: boolean;
+}
+
+const Sidebar = (props: Props) => {
   const dispatch = useDispatch();
   const { data: session } = useSession();
   const profileImage = session?.user?.image || '/avatar.png';
 
-  const tab = useSelector((state: RootState) => state.general.tab);
+  const { messageFlags, tab } = useSelector(
+    (state: RootState) => state.general
+  );
+
+  const hasFlag = (tab: string) => {
+    const flag = messageFlags.find((m: any) => m.type === tab);
+    if (flag?.isNew) return true;
+    return false;
+  };
 
   const handleClick = (tabTag: string) => {
     dispatch(toggleTab(tabTag));
+    dispatch(setMessageFlag({ type: tabTag, isNew: false }));
   };
 
   return (
@@ -34,27 +47,41 @@ const Sidebar = () => {
           className={tab === 'bookmarks' ? 'active' : ''}
           onClick={() => handleClick('bookmarks')}
         >
-          {/* <BookmarksOutlinedIcon /> */}
-          <IoBookmarksOutline />
+          <BsBookmarks />
         </span>
         <span
-          className={tab === 'direct' ? 'active' : ''}
+          className={
+            tab === 'direct'
+              ? `active ${hasFlag('direct') ? 'has-flag' : ''}`
+              : ''
+          }
           onClick={() => handleClick('direct')}
         >
           <IoMdChatboxes />
         </span>
         <span
-          className={tab === 'group' ? 'active' : ''}
+          className={
+            tab === 'group'
+              ? `active ${hasFlag('group') ? 'has-flag' : ''}`
+              : ''
+          }
           onClick={() => handleClick('group')}
         >
           <HiOutlineUserGroup />
         </span>
-        <span
-          className={tab === 'service' ? 'active' : ''}
-          onClick={() => handleClick('service')}
-        >
-          <RiCustomerService2Fill />
-        </span>
+        {props.isAdmin && (
+          <span
+            className={
+              tab === 'service'
+                ? `active ${hasFlag('service') ? 'has-flag' : ''}`
+                : ''
+            }
+            onClick={() => handleClick('service')}
+          >
+            <RiCustomerService2Fill />
+          </span>
+        )}
+
         <span
           className={tab === 'chart' ? 'active' : ''}
           onClick={() => handleClick('chart')}

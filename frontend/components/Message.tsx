@@ -3,10 +3,11 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ClickOutside from '../components/ClickOutside';
-import { IChatMessage } from '../interfaces/channeltypes';
+import { IChatMessage, IUser } from '../interfaces/channeltypes';
 
 interface Props {
   data: IChatMessage;
+  widgetUser: IUser;
 }
 
 const Message = (props: Props) => {
@@ -35,13 +36,15 @@ const Message = (props: Props) => {
   const [messageOptions, toggleMessageOptions] = useState<boolean>(false);
   const { data: session } = useSession();
 
-  const user = session?.user || {
-    email: undefined,
-    image: undefined,
-    name: 'Guest',
-  };
+  const user = session?.user ||
+    props.widgetUser || {
+      email: undefined,
+      image: undefined,
+      name: 'Guest',
+    };
   const userImage = data?.user?.image || '/avatar.png';
   const currentTime = data.createdAt;
+
   return (
     <div
       className={`message ${
@@ -61,15 +64,17 @@ const Message = (props: Props) => {
 
         {messageOptions && (
           <ClickOutside handleClick={() => toggleMessageOptions(false)}>
-            <MoreHorizIcon
-              className="message__more__others"
-              onClick={() => toggleMessageOptions(!messageOptions)}
-            />
-            <div className="message__options">
-              <span>Edit Message</span>
-              <span>Delete</span>
-              <span>Reply</span>
-            </div>
+            <>
+              <MoreHorizIcon
+                className="message__more__others"
+                onClick={() => toggleMessageOptions(!messageOptions)}
+              />
+              <div className="message__options">
+                <span>Edit Message</span>
+                <span>Delete</span>
+                <span>Reply</span>
+              </div>
+            </>
           </ClickOutside>
         )}
       </div>

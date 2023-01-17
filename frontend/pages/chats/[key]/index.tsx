@@ -19,6 +19,8 @@ import { useSocket } from '../../../components/SocketProvider';
 import { useRouter } from 'next/router';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,8 +36,19 @@ const ChatView = (props: Props) => {
   const router = useRouter();
   const { query } = router;
   const { key } = query;
+  const tab = useSelector((state: RootState) => state.general.tab);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  const { trigger } = useSWRMutation(
+  useEffect(() => {
+    const creator = props.channel.createdBy;
+    const authEmail = session?.user?.email;
+    if (!users || !creator || !authEmail) return;
+
+    const adminUser = users.find(user => user.id === creator);
+    if (adminUser?.email === authEmail) setIsAdmin(true);
+  }, [users, session, props.channel.createdBy]);
+
+  const { data, trigger } = useSWRMutation(
     key ? `${BASE}/channels/${key}` : null,
     noAuthPutter
   );
@@ -45,12 +58,11 @@ const ChatView = (props: Props) => {
     socket.auth = { user: session.user, channel: key };
 
     socket.connect();
-    console.log(socket);
   }, [socket, session, key]);
 
   useEffect(() => {
     const userEmail = session?.user?.email;
-    if (!userEmail || !key) return;
+    if (!userEmail || !key || tab === 'service') return;
 
     const isUserInChannel = users?.some(user => user.email === userEmail);
 
@@ -61,7 +73,7 @@ const ChatView = (props: Props) => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, key, users]);
+  }, [session, key, users, tab]);
 
   //  useEffect(() => {
   //    if (!activeTab || !currentUser?.email || !user?.email || !query.key)
@@ -79,7 +91,7 @@ const ChatView = (props: Props) => {
     <div className={`chatview ${inter.className}`}>
       <ProtectedRoute>
         <>
-          <Sidebar />
+          <Sidebar isAdmin={isAdmin} />
           <ChatBar
             users={users}
             setCurrentUser={setCurrentUser}
@@ -129,7 +141,6 @@ export const getStaticPaths = async () => {
 export const getStaticProps = async (context: any) => {
   const res = await fetch(`${BASE}/channels/${context.params.key}`);
   const channel = await res.json();
-  console.log(channel.users);
   return {
     props: {
       channel,

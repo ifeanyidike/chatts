@@ -9,16 +9,27 @@ import { useSession } from 'next-auth/react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import Message from './Message';
+import axios from 'axios';
+import { BASE } from '../utils/appUtil';
+import { RippleLoader } from './Loaders';
+import { getGuestMessages } from '../utils/generalUtils';
+import { useRouter } from 'next/router';
+import GuestInfo from './GuestInfo';
+import { useDispatch } from 'react-redux';
+import { setMessageFlag } from '../redux/slices/general';
 
 interface Props {
   isTyping?: boolean;
   isInIframe?: boolean;
   currentUser?: IUser;
-  currentCourse?: ICurrentCourse[];
+  currentCourse?: any;
   setMessages: Dispatch<SetStateAction<IChatMessage[]>>;
   messages: IChatMessage[];
   scrollTargetRef: React.MutableRefObject<HTMLDivElement>;
   activeTab?: string;
+  widgetUser?: any;
+  setWidgetUser?: Dispatch<SetStateAction<IUser>>;
+  widgetLocation?: string;
 }
 
 interface IUserTyping {
@@ -28,19 +39,36 @@ interface IUserTyping {
 
 const MessageList = (props: Props) => {
   const { socket } = useSocket();
-  const { isTyping, isInIframe, messages, setMessages } = props;
+  const {
+    isTyping,
+    isInIframe,
+    messages,
+    setMessages,
+    widgetUser,
+    setWidgetUser,
+    widgetLocation,
+    currentCourse,
+  } = props;
   const [userTyping, setUserTyping] = useState<IUserTyping>({});
+
   const { data: session } = useSession();
+  const dispatch = useDispatch();
   const tab = useSelector((state: RootState) => state.general.tab);
-  const [noAuthServiceMessages, setNoAuthServiceMessages] = useState<any>({});
 
-  const course = props.currentCourse?.length ? props.currentCourse[0] : null;
+  const { query } = useRouter();
 
-  const user = session?.user || {
-    email: undefined,
-    image: undefined,
-    name: 'Guest',
-  };
+  const course = currentCourse?.id
+    ? currentCourse
+    : currentCourse?.length
+    ? props.currentCourse[0]
+    : null;
+
+  const user = session?.user ||
+    widgetUser || {
+      email: undefined,
+      image: undefined,
+      name: 'Guest',
+    };
 
   useEffect(() => {
     if (isTyping === undefined || !socket) return;
@@ -63,77 +91,65 @@ const MessageList = (props: Props) => {
   }, [socket]);
 
   useEffect(() => {
-    if (!socket || tab === 'service') return;
+    document
+      ?.getElementById('chatts__scrollto__element')
+      ?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+
     socket.on('onReceiveMessage', (data: any) => {
-      if (course?.chatcourseId !== data.chatcourseId) {
+      const courseId =
+        course?.chatcourseId || course?.id || widgetUser?.chatcourseId;
+
+      if (courseId !== data.chatcourseId) {
         return;
       }
-      const formattedMessage: IChatMessage = data;
 
+      if (data.type !== tab && !isInIframe) {
+        return;
+      }
+
+      if (tab !== 'group' && data?.user?.email !== user?.email) {
+        dispatch(setMessageFlag({ type: tab, isNew: true }));
+      }
+
+      const formattedMessage: IChatMessage = data;
       setMessages([...messages, formattedMessage]);
 
       // props.messageListRef.current.scrollTop =
       //   props.messageListRef?.current?.scrollHeight;
-      props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
+      // props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
+      document
+        ?.getElementById('chatts__scrollto__element')
+        ?.scrollIntoView({ behavior: 'smooth' });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket, session, messages, tab, course, noAuthServiceMessages]);
+  }, [socket, session, messages, tab, course, widgetUser]);
 
-  useEffect(() => {
-    const isInService = window.location.pathname.includes('chat-widget');
-    console.log({ isInService });
-    if (!socket || (!isInService && tab !== 'service')) return;
-    console.log({ tab });
-
-    socket.on('onReceiveServiceMessage', (data: any) => {
-      console.log(data);
-      const messages = noAuthServiceMessages;
-      if (!messages.hasOwnProperty(data.location)) {
-        messages[data.location] = [];
-      }
-      const item = {
-        user: data.sender,
-        text: data.text,
-        createdAt: data.createdAt,
-      };
-      const exists = messages[data.location].some(
-        (m: any) => JSON.stringify(item) === JSON.stringify(m)
-      );
-      if (!exists) {
-        messages[data.location].push(item);
-      }
-      console.log(messages);
-      localStorage.setItem('no-auth-messages', JSON.stringify(messages));
-      setNoAuthServiceMessages(messages);
-
-      // if (course?.chatcourseId !== data.chatcourseId) {
-      //   return;
-      // }
-      // const formattedMessage: IChatMessage = data;
-      // setMessages([...messages, formattedMessage]);
-      // // props.messageListRef.current.scrollTop =
-      // //   props.messageListRef?.current?.scrollHeight;
-      // props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
-    });
-  }, [socket, session, messages, tab, course, noAuthServiceMessages]);
-
-  useEffect(() => {
-    console.log({ noAuthServiceMessages });
-  }, [noAuthServiceMessages]);
   return (
     <div
       id="messages"
       className={`messagelist ${!isInIframe ? 'desktop-view' : 'iframe-view'}`}
     >
-      <>
-        {messages?.map(data => (
-          <Message key={data.id} data={data} />
+      <div className="messages__content">
+        {isInIframe && user.name === 'Guest' && (
+          <GuestInfo
+            widgetLocation={widgetLocation}
+            setMessages={setMessages}
+            setWidgetUser={setWidgetUser}
+          />
+        )}
+        {messages?.map((data, idx) => (
+          <Message key={data.id || idx} data={data} widgetUser={widgetUser} />
         ))}
         <div
-          style={{ float: 'left', clear: 'both' }}
+          id="chatts__scrollto__element"
+          style={{ marginTop: '30px' }}
           ref={props.scrollTargetRef}
         ></div>
-      </>
+      </div>
 
       {Object.keys(userTyping).length && userTyping.email !== user?.email ? (
         <span className="messagelist__typingindicator">

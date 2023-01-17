@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import dynamic from 'next/dynamic';
 import React, { useEffect, useState, useRef } from 'react';
 import MessageList from './MessageList';
@@ -24,6 +25,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import useHandleServiceReceivedMessage from '../hooks/useHandleServiceReceivedMessage';
+import { getGuestMessages } from '../utils/generalUtils';
 
 interface Props {
   users: IUser[];
@@ -41,37 +44,57 @@ const MesagePane = (props: Props) => {
   const activeTab = useSelector((state: RootState) => state.general.tab);
   const { query } = useRouter();
   const scrollTargetRef = useRef() as React.MutableRefObject<HTMLDivElement>;
-  // const { data, error } = useSWR(
-  //   activeTab ? `${BASE}/chatcourse` : null,
-  //   activeTab ? () => noAuthPoster : null
-  // );
+  const friendEmail = currentUser?.email || currentUser?.currentUser?.email;
 
   const { data: currentCourse, trigger } = useSWRMutation(
     activeTab ? `${BASE}/chatcourse` : null,
     noAuthPoster
   );
 
-  const course = currentCourse?.length ? currentCourse[0] : null;
+  const course =
+    activeTab === 'service'
+      ? currentCourse
+      : currentCourse?.length
+      ? currentCourse[0]
+      : null;
+
+  const courseId = course ? course.chatcourseId || course.id : null;
 
   const { data, error } = useSWR(
-    course?.chatcourseId ? `${BASE}/messages/${course.chatcourseId}` : null,
-    course?.chatcourseId ? noAuthFetcher : null
+    courseId ? `${BASE}/messages/${courseId}` : null,
+    courseId ? noAuthFetcher : null
   );
 
-  useEffect(() => {
-    setMessages(data || []);
-  }, [data]);
+  const noAuthServiceMessages = useHandleServiceReceivedMessage();
 
   useEffect(() => {
-    if (!activeTab || !currentUser?.email || !user?.email || !query.key) return;
+    if (currentUser?.isGuest || currentUser.name === 'Guest') {
+      let guestMessages: any = getGuestMessages(noAuthServiceMessages);
+      const addr = currentUser?.name || '';
+      const _messages = guestMessages?.[addr] || [];
+      setMessages(_messages);
+    } else {
+      setMessages(data || []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, currentUser?.id, noAuthServiceMessages, activeTab]);
+
+  useEffect(() => {
+    if (!activeTab || !friendEmail || !user?.email || !query.key) return;
+
+    if (activeTab === 'service' && !currentUser.name) return;
+
     (async () => {
       setLoading(true);
+      const members = [friendEmail, user.email];
+      const name = currentUser.name;
 
-      const members = [currentUser.email, user.email];
-      await trigger({ data: { activeTab, members, channelKey: query.key } });
+      await trigger({
+        data: { activeTab, members, channelKey: query.key, name },
+      });
       setLoading(false);
     })();
-  }, [activeTab, currentUser?.email, user?.email, trigger, query.key]);
+  }, [activeTab, friendEmail, user?.email, trigger, query.key, currentUser]);
 
   return (
     <div className="messagepane">

@@ -7,6 +7,8 @@ export interface IUser {
   image?: string;
   name?: string;
   updatedAt?: Date;
+  isGuest?: boolean;
+  currentUser?: IUser;
 }
 
 export interface IChannelUsers {

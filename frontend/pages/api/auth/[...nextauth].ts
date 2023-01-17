@@ -31,7 +31,6 @@ export const authOptions = {
           url,
           provider: { server, from },
         } = params;
-        console.log({ email, url, server, from });
         sendVerificationRequest(params);
       },
     }),

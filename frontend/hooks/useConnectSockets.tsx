@@ -25,13 +25,6 @@ const ConnectSockets = () => {
     socket?.onAny(e => console.log(e));
   }, [socket]);
 
-  // useEffect(() => {
-  //   console.log({ socket });
-  //   socket?.once('connect', () => {
-  //     console.log(socket.id);
-  //   });
-  // }, [socket]);
-
   useEffect(() => {
     socket?.on('connect_error', err => {
       if (err.message === 'invalid user') {

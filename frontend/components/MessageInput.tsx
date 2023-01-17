@@ -30,6 +30,8 @@ interface Props {
   setMessages: Dispatch<SetStateAction<IChatMessage[]>>;
   messages: IChatMessage[];
   scrollTargetRef: React.MutableRefObject<HTMLDivElement>;
+  chatcourseId?: string;
+  admin?: IUser;
 }
 const MessageInput = (props: Props) => {
   const { isInIframe, setIsTyping } = props;
@@ -40,7 +42,7 @@ const MessageInput = (props: Props) => {
   const formRef = useRef<null | HTMLFormElement>(null);
   const [message, setMessage] = useState<string>('');
   const tab = useSelector((state: RootState) => state.general.tab);
-  const { currentCourse } = props;
+  const { currentCourse }: any = props;
 
   const { isTyping, handleDown, handleUp } = useTypingIndicator();
   const { socket } = useSocket();
@@ -58,20 +60,25 @@ const MessageInput = (props: Props) => {
 
   const sendSocketMessage = () => {
     if (!socket) return;
-    const { currentUser } = props;
+    const { currentUser, admin } = props;
 
-    const courseId = currentCourse?.length
-      ? currentCourse[0].chatcourseId
-      : null;
+    const courseId =
+      isInIframe || tab === 'service'
+        ? props.chatcourseId || currentCourse?.id
+        : currentCourse?.length
+        ? currentCourse[0].chatcourseId
+        : null;
 
     socket.emit('onSendMessage', {
       message,
-      receiver: {
-        name: currentUser?.name,
-        email: currentUser?.email,
-        image: currentUser?.image,
-        id: currentUser?.id,
-      },
+      receiver: isInIframe
+        ? admin
+        : {
+            name: currentUser?.name,
+            email: currentUser?.email || currentUser?.currentUser?.email,
+            image: currentUser?.image,
+            id: currentUser?.id,
+          },
       isInIframe,
       from: props.from,
       type: props.from === 'serviceguest' ? 'service' : tab,
@@ -80,6 +87,7 @@ const MessageInput = (props: Props) => {
     });
 
     props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
+
     setMessage('');
   };
 
@@ -89,12 +97,18 @@ const MessageInput = (props: Props) => {
     if (e.key === 'Enter' && e.shiftKey === false) {
       e.preventDefault();
       sendSocketMessage();
+      document
+        ?.getElementById('chatts__scrollto__element')
+        ?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     sendSocketMessage();
+    document
+      ?.getElementById('chatts__scrollto__element')
+      ?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
