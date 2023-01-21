@@ -22,6 +22,10 @@ const ChatCourse = sequelize.define(
     tags: {
       type: DataTypes.STRING,
     },
+    isDefault: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     timestamps: true,

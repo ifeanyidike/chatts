@@ -13,6 +13,7 @@ import ChatCourseRoutes from './routes/chatcourses';
 import MessageRoutes from './routes/messages';
 import UserRoutes from './routes/users';
 import User from './models/User';
+import ChatCourse from './models/chatcourse';
 
 const app = express();
 app.use(cors());
@@ -40,6 +41,21 @@ app.use('/api/users', UserRoutes);
 // app.use(params => middlewares(params, app));
 
 (async () => {
+  // const allChannels: any = await Channel.findAll();
+  // const channelKeys = allChannels.map((c: any) => c.dataValues.key);
+  // const courses = await Promise.all(
+  //   channelKeys.map((key: string) =>
+  //     ChatCourse.create({
+  //       type: 'group',
+  //       isDefault: true,
+  //       channelKey: key,
+  //     })
+  //   )
+  // );
+  // const course = await ChatCourse.create({
+  //   type: 'group',
+  //   isDefault: true
+  // })
   //   const channelKey = nanoid();
   //   const member1 = 'f79ca305-2b31-4510-8fb6-24073eeb31dd';
   //   const member2 = 'aed38dd6-d744-4686-aa65-c35dfd91e6f8';

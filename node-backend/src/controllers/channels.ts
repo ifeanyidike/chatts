@@ -1,11 +1,23 @@
 import { nanoid } from 'nanoid';
 import Channel from '../models/Channel';
+import ChatCourse from '../models/chatcourse';
 import User from '../models/User';
 
 export const getChannelByKey = async (req: any, res: any, next: any) => {
   try {
     const { key } = req.params;
-    const channel = await Channel.findOne({ where: { key }, include: User });
+    const channel = await Channel.findOne({
+      where: { key },
+      include: [
+        {
+          model: User,
+        },
+        {
+          model: ChatCourse,
+          include: [User],
+        },
+      ],
+    });
 
     res.status(200).json(channel);
   } catch (error) {
@@ -32,6 +44,8 @@ export const getUsersChannelByEmail = async (req: any, res: any, next: any) => {
       include: Channel,
     });
 
+    console.log('getUsersChannelByEmail:', { user });
+
     res.status(200).json(user);
   } catch (error: any) {
     console.log(error.message);
@@ -51,6 +65,14 @@ export const createChannel = async (req: any, res: any, next: any) => {
       createdBy: userId,
       key: nanoid(),
     });
+    //create general chatcourse
+    const chatCourse: any = await ChatCourse.create({
+      type: 'group',
+      isDefault: true,
+      title: 'General',
+    });
+    await channel.addChatcourse(chatCourse);
+
     const updatedChannel = await channel?.addUser(currentUser);
     res.status(201).json(updatedChannel);
   } catch (error) {
