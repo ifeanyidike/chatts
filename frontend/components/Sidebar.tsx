@@ -11,6 +11,9 @@ import { useSession } from 'next-auth/react';
 import type { RootState } from '../redux/store';
 import { useSelector, useDispatch } from 'react-redux';
 import { setMessageFlag, toggleTab } from '../redux/slices/general';
+import { setCurrentUser } from '../redux/slices/user';
+import { setSelectedCourse } from '../redux/slices/course';
+import { setMessages } from '../redux/slices/message';
 
 interface Props {
   isAdmin: boolean;
@@ -25,6 +28,8 @@ const Sidebar = (props: Props) => {
     (state: RootState) => state.general
   );
 
+  const { messages } = useSelector((state: RootState) => state.message);
+
   const hasFlag = (tab: string) => {
     const flag = messageFlags.find((m: any) => m.type === tab);
     if (flag?.isNew) return true;
@@ -34,6 +39,9 @@ const Sidebar = (props: Props) => {
   const handleClick = (tabTag: string) => {
     dispatch(toggleTab(tabTag));
     dispatch(setMessageFlag({ type: tabTag, isNew: false }));
+    dispatch(setCurrentUser({}));
+    dispatch(setSelectedCourse({}));
+    dispatch(setMessages([]));
   };
 
   return (

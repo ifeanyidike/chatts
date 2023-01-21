@@ -4,6 +4,8 @@ import { getGuestMessages } from '../utils/generalUtils';
 import { BASE } from '../utils/appUtil';
 import { useRouter } from 'next/router';
 import { IChatMessage, IUser } from '../interfaces/channeltypes';
+import { useDispatch } from 'react-redux';
+import { setMessages } from '../redux/slices/message';
 
 interface ISignInInfo {
   email?: string;
@@ -18,7 +20,6 @@ interface AuthError {
 interface Props {
   widgetLocation?: string;
   setWidgetUser?: Dispatch<SetStateAction<IUser>>;
-  setMessages: Dispatch<SetStateAction<IChatMessage[]>>;
 }
 
 const GuestInfo = (props: Props) => {
@@ -27,8 +28,9 @@ const GuestInfo = (props: Props) => {
   const [authError, setAuthError] = useState<AuthError>({});
   const [showSignIn, setShowSignIn] = useState<boolean>(false);
 
+  const dispatch = useDispatch();
   const { query } = useRouter();
-  const { widgetLocation, setWidgetUser, setMessages } = props;
+  const { widgetLocation, setWidgetUser } = props;
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,7 +61,7 @@ const GuestInfo = (props: Props) => {
         localStorage.setItem('widgetUser', JSON.stringify(data.user));
       }
       if (data.allMessages) {
-        setMessages(data.allMessages);
+        dispatch(setMessages(data.allMessages));
       }
     } catch (error: any) {
       if (

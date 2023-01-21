@@ -1,9 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import generalSlice from './slices/general';
+import messageSlice from './slices/message';
+import courseSlice from './slices/course';
+import userSlice from './slices/user';
 
 export const store = configureStore({
   reducer: {
     general: generalSlice,
+    message: messageSlice,
+    course: courseSlice,
+    user: userSlice,
   },
 });
 

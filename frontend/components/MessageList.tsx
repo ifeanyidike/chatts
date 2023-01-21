@@ -17,14 +17,12 @@ import { useRouter } from 'next/router';
 import GuestInfo from './GuestInfo';
 import { useDispatch } from 'react-redux';
 import { setMessageFlag } from '../redux/slices/general';
+import { addMessage } from '../redux/slices/message';
 
 interface Props {
   isTyping?: boolean;
   isInIframe?: boolean;
-  currentUser?: IUser;
   currentCourse?: any;
-  setMessages: Dispatch<SetStateAction<IChatMessage[]>>;
-  messages: IChatMessage[];
   scrollTargetRef: React.MutableRefObject<HTMLDivElement>;
   activeTab?: string;
   widgetUser?: any;
@@ -42,8 +40,6 @@ const MessageList = (props: Props) => {
   const {
     isTyping,
     isInIframe,
-    messages,
-    setMessages,
     widgetUser,
     setWidgetUser,
     widgetLocation,
@@ -54,10 +50,12 @@ const MessageList = (props: Props) => {
   const { data: session } = useSession();
   const dispatch = useDispatch();
   const tab = useSelector((state: RootState) => state.general.tab);
+  const { selectedCourse } = useSelector((state: RootState) => state.course);
+  const { messages } = useSelector((state: RootState) => state.message);
 
-  const { query } = useRouter();
-
-  const course = currentCourse?.id
+  const course = selectedCourse
+    ? selectedCourse
+    : currentCourse?.id
     ? currentCourse
     : currentCourse?.length
     ? props.currentCourse[0]
@@ -116,7 +114,7 @@ const MessageList = (props: Props) => {
       }
 
       const formattedMessage: IChatMessage = data;
-      setMessages([...messages, formattedMessage]);
+      dispatch(addMessage(formattedMessage));
 
       // props.messageListRef.current.scrollTop =
       //   props.messageListRef?.current?.scrollHeight;
@@ -137,7 +135,6 @@ const MessageList = (props: Props) => {
         {isInIframe && user.name === 'Guest' && (
           <GuestInfo
             widgetLocation={widgetLocation}
-            setMessages={setMessages}
             setWidgetUser={setWidgetUser}
           />
         )}

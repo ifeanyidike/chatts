@@ -4,30 +4,46 @@ import useSWR from 'swr';
 import { useRouter } from 'next/router';
 import ChatItem from './ChatItem';
 import SearchBar from './SearchBar';
-import { IUser } from '../interfaces/channeltypes';
+import { ICurrentCourse, IUser } from '../interfaces/channeltypes';
 import { useSession } from 'next-auth/react';
 import { useSocket } from './SocketProvider';
 import { BASE, noAuthFetcher } from '../utils/appUtil';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCurrentUser } from '../redux/slices/user';
+import { setSelectedCourse } from '../redux/slices/course';
+import { RootState } from '../redux/store';
+import { IoMdAddCircleOutline } from 'react-icons/io';
 
 interface Props {
   // setOpenedChat: (e: number) => void;
   // openedChat: undefined | number;
   activeTab: string;
   users: IUser[];
-  setCurrentUser: (e: IUser) => void;
-  currentUser?: IUser;
+  courses: ICurrentCourse[];
 }
 
 interface ChannelTypeUsers {
   Guests?: any;
   authUsers?: IUser[];
 }
+
+interface HandleSubmit {
+  user?: IUser;
+  course?: ICurrentCourse;
+}
+
 const ChatList = (props: Props) => {
+  const dispatch = useDispatch();
+
+  const { currentUser } = useSelector((state: RootState) => state.user);
+  const { selectedCourse } = useSelector((state: RootState) => state.course);
+
   const { data: session } = useSession();
   const { onlineUsers } = useSocket();
   const { users, activeTab } = props;
   const [hasGuests, setHasGuests] = useState<boolean>(false);
   const { query } = useRouter();
+  const courses = props.courses;
   const { key } = query;
 
   const [channelTypeUsers, setChannelTypeUsers] = useState<ChannelTypeUsers>({
@@ -35,15 +51,26 @@ const ChatList = (props: Props) => {
     authUsers: [],
   });
 
-  const { data: course, error } = useSWR(
-    key && activeTab !== 'direct'
-      ? `${BASE}/chatcourse/${key}?type=${activeTab}`
-      : null,
-    key ? noAuthFetcher : null
-  );
+  const [groupCourses, setGroupCourses] = useState<ICurrentCourse[]>([]);
+
+  // const { data: course, error } = useSWR(
+  //   key && activeTab !== 'direct'
+  //     ? `${BASE}/chatcourse/${key}?type=${activeTab}`
+  //     : null,
+  //   key ? noAuthFetcher : null
+  // );
 
   useEffect(() => {
-    if (activeTab === 'service' && course) {
+    if (courses && activeTab === 'group') {
+      const _groupCourses = courses?.filter(
+        (course: any) => course.type === activeTab
+      );
+      setGroupCourses(_groupCourses);
+    }
+  }, [courses, activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'service') {
       let msg = localStorage.getItem('no-auth-messages');
       let _messages = msg ? JSON.parse(msg) : {};
 
@@ -58,17 +85,19 @@ const ChatList = (props: Props) => {
         };
       });
 
-      const authUsers = course?.map((c: any) => {
-        const currentUser = c.users.find(
-          (u: any) => u.email !== session?.user?.email
-        );
-        return {
-          name: c.title,
-          tags: c.tags,
-          id: currentUser.id,
-          currentUser,
-        };
-      });
+      const authUsers = courses
+        ?.filter((course: any) => course.type === activeTab)
+        .map((c: any) => {
+          const currentUser = c.users.find(
+            (u: any) => u.email !== session?.user?.email
+          );
+          return {
+            name: c.title,
+            tags: c.tags,
+            id: currentUser.id,
+            currentUser,
+          };
+        });
       const hasGuests = !!guests.length;
       setHasGuests(hasGuests);
 
@@ -83,47 +112,96 @@ const ChatList = (props: Props) => {
         authUsers: _users,
       });
     }
-  }, [users, activeTab, session, course]);
+  }, [users, activeTab, session, courses]);
 
-  const handleClick = (user: IUser) => {
-    props.setCurrentUser(user);
+  const handleClick = (_props: HandleSubmit) => {
+    const { user, course } = _props;
+
+    if (course?.isEditable) return;
+
+    if (user && activeTab !== 'group') {
+      dispatch(setCurrentUser(user));
+      // props.setCurrentUser(user);
+    }
+    if (course) {
+      dispatch(setSelectedCourse(course));
+      // props.setSelectedCourse(course);
+    }
+  };
+
+  const handleAddGroupCourse = async () => {
+    const courseToAdd = {
+      channelKey: key?.toString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDefault: false,
+      id: crypto.randomUUID(),
+      title: 'Changes Required',
+      type: 'group',
+      isEditable: true,
+    };
+    setGroupCourses([...groupCourses, courseToAdd]);
   };
 
   return (
     <div className="chatlist">
       <div className="chatlist__header">
         <b>Message</b>
-        <span className="chatlist__header__settings">
-          <FiSettings />
-        </span>
+        <div className="chatlist__settings__container">
+          <span className="chatlist__header__settings">
+            <FiSettings />
+          </span>
+          {activeTab === 'group' && (
+            <span
+              className="chatlist__header__settings"
+              onClick={handleAddGroupCourse}
+            >
+              <IoMdAddCircleOutline />
+            </span>
+          )}
+        </div>
       </div>
 
-      {Object.entries(channelTypeUsers).map(([tag, users]) => {
-        const isGuest = tag === 'Guests';
-        const hasUsers = tag !== 'Guests' && users.length;
-        return (
-          <React.Fragment key={tag}>
-            {hasGuests && isGuest ? (
-              <h4>{tag}</h4>
-            ) : hasUsers ? (
-              <h4>Users</h4>
-            ) : null}
-            {users?.map((user: any, index: number) => (
-              <ChatItem
-                key={user.id || index}
-                isSelected={props.currentUser?.id === user.id}
-                handleClick={() => handleClick({ ...user, isGuest })}
-                isOnline={onlineUsers.some(
-                  (_user: IUser) =>
-                    _user.email === user.email ||
-                    _user.email === user.currentUser?.email
-                )}
-                user={{ ...user, isGuest }}
-              />
-            ))}
-          </React.Fragment>
-        );
-      })}
+      {activeTab === 'group'
+        ? groupCourses.map((course: any) => (
+            <ChatItem
+              key={course.id}
+              isSelected={selectedCourse?.id === course.id}
+              handleClick={() => handleClick({ course })}
+              course={course}
+              activeTab={activeTab}
+              // user={{ ...user, isGuest }}
+            />
+          ))
+        : Object.entries(channelTypeUsers).map(([tag, users]) => {
+            const isGuest = tag === 'Guests';
+            const hasUsers = tag !== 'Guests' && users.length;
+            return (
+              <React.Fragment key={tag}>
+                {hasGuests && isGuest ? (
+                  <h4>{tag}</h4>
+                ) : hasUsers ? (
+                  <h4>Users</h4>
+                ) : null}
+                {users?.map((user: any, index: number) => (
+                  <ChatItem
+                    key={user.id || index}
+                    isSelected={currentUser?.id === user.id}
+                    handleClick={() =>
+                      handleClick({ user: { ...user, isGuest } })
+                    }
+                    isOnline={onlineUsers.some(
+                      (_user: IUser) =>
+                        _user.email === user.email ||
+                        _user.email === user.currentUser?.email
+                    )}
+                    user={{ ...user, isGuest }}
+                    activeTab={activeTab}
+                  />
+                ))}
+              </React.Fragment>
+            );
+          })}
     </div>
   );
 };

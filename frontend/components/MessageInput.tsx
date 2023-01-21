@@ -25,10 +25,9 @@ interface Props {
   isInIframe: boolean;
   setIsTyping: (e: undefined | boolean) => void;
   currentUser?: IUser;
+  selectedCourse?: ICurrentCourse;
   from?: string;
   currentCourse?: ICurrentCourse[];
-  setMessages: Dispatch<SetStateAction<IChatMessage[]>>;
-  messages: IChatMessage[];
   scrollTargetRef: React.MutableRefObject<HTMLDivElement>;
   chatcourseId?: string;
   admin?: IUser;
@@ -41,7 +40,10 @@ const MessageInput = (props: Props) => {
   const inputRef = useRef<null | HTMLTextAreaElement>(null);
   const formRef = useRef<null | HTMLFormElement>(null);
   const [message, setMessage] = useState<string>('');
+
   const tab = useSelector((state: RootState) => state.general.tab);
+  const { currentUser } = useSelector((state: RootState) => state.user);
+  const { selectedCourse } = useSelector((state: RootState) => state.course);
   const { currentCourse }: any = props;
 
   const { isTyping, handleDown, handleUp } = useTypingIndicator();
@@ -60,25 +62,28 @@ const MessageInput = (props: Props) => {
 
   const sendSocketMessage = () => {
     if (!socket) return;
-    const { currentUser, admin } = props;
+    const { admin } = props;
 
-    const courseId =
-      isInIframe || tab === 'service'
-        ? props.chatcourseId || currentCourse?.id
-        : currentCourse?.length
-        ? currentCourse[0].chatcourseId
-        : null;
+    const courseId = selectedCourse
+      ? selectedCourse.id
+      : isInIframe || tab === 'service'
+      ? props.chatcourseId || currentCourse?.id
+      : currentCourse?.length
+      ? currentCourse[0].chatcourseId
+      : null;
 
     socket.emit('onSendMessage', {
       message,
-      receiver: isInIframe
-        ? admin
-        : {
-            name: currentUser?.name,
-            email: currentUser?.email || currentUser?.currentUser?.email,
-            image: currentUser?.image,
-            id: currentUser?.id,
-          },
+      ...(tab !== 'group' && {
+        receiver: isInIframe
+          ? admin
+          : {
+              name: currentUser?.name,
+              email: currentUser?.email || currentUser?.currentUser?.email,
+              image: currentUser?.image,
+              id: currentUser?.id,
+            },
+      }),
       isInIframe,
       from: props.from,
       type: props.from === 'serviceguest' ? 'service' : tab,

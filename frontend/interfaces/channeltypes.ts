@@ -26,17 +26,20 @@ export interface IUserChannels {
   createdAt: string;
   updatedAt: string;
   users: IUser[];
+  chatcourses?: ICurrentCourse[];
 }
 
 export interface ICurrentCourse {
   chatcourseId?: string;
-  createdAt: string;
+  createdAt?: Date;
   title?: string;
   tags?: string;
   channelKey?: string;
-  id: string;
-  updatedAt: string;
-  userId: string;
+  id?: string;
+  updatedAt?: Date;
+  userId?: string;
+  isEditable?: boolean;
+  isDefault?: boolean;
 }
 
 export interface ISocketUser {

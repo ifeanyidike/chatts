@@ -16,6 +16,8 @@ import { io, Socket } from 'socket.io-client';
 import useHandleServiceReceivedMessage from '../hooks/useHandleServiceReceivedMessage';
 import useHandleMessages from '../hooks/useHandleMessages';
 import { getGuestMessages } from '../utils/generalUtils';
+import { useDispatch } from 'react-redux';
+import { setMessages } from '../redux/slices/message';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -47,12 +49,12 @@ const ChatWidget = (props: Props) => {
   const [widgetOpen, toggleWidget] = useState<undefined | boolean>(undefined);
   const [isInIframe, setIsInIframe] = useState(false);
   const [isTyping, setIsTyping] = useState<undefined | boolean>(undefined);
-  const [messages, setMessages] = useState<IChatMessage[]>([]);
   const scrollTargetRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   let { socket, onlineUsers } = useSocket();
   const { data: session } = useSession();
   const [widgetUser, setWidgetUser] = useState<WidgetUser>({});
   const [isAdminOnline, setIsAdminOnline] = useState(false);
+  const dispatch = useDispatch();
 
   const noAuthServiceMessages = useHandleServiceReceivedMessage();
 
@@ -135,15 +137,15 @@ const ChatWidget = (props: Props) => {
     if (!widgetUser?.id) return;
 
     if (props.messages) {
-      setMessages(props.messages);
+      dispatch(setMessages(props.messages));
     } else if (widgetUser?.isGuest || widgetUser.name === 'Guest') {
       let guestMessages: any = getGuestMessages(noAuthServiceMessages);
       let addr = location || '';
       const _messages = guestMessages?.[addr] || [];
 
-      setMessages(_messages);
+      dispatch(setMessages(_messages));
     } else {
-      setMessages([]);
+      dispatch(setMessages([]));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [widgetUser?.id, noAuthServiceMessages, location, props.messages]);
@@ -180,8 +182,6 @@ const ChatWidget = (props: Props) => {
           <MessageList
             isInIframe={isInIframe}
             isTyping={isTyping}
-            setMessages={setMessages}
-            messages={messages}
             scrollTargetRef={scrollTargetRef}
             widgetUser={widgetUser}
             setWidgetUser={setWidgetUser}
@@ -191,8 +191,6 @@ const ChatWidget = (props: Props) => {
             isInIframe={isInIframe}
             setIsTyping={setIsTyping}
             from="serviceguest"
-            setMessages={setMessages}
-            messages={messages}
             chatcourseId={widgetUser?.chatcourseId}
             scrollTargetRef={scrollTargetRef}
             admin={props.admin}

@@ -12,13 +12,16 @@ import { BASE, noAuthPutter } from '../../../utils/appUtil';
 import { Inter } from '@next/font/google';
 import MesagePane from '../../../components/MessagePane';
 import Header from '../../../components/Header';
-import { IUserChannels, IUser } from '../../../interfaces/channeltypes';
+import {
+  IUserChannels,
+  IUser,
+  ICurrentCourse,
+} from '../../../interfaces/channeltypes';
 import ProtectedRoute from '../../protected';
 import { useSession } from 'next-auth/react';
 import { useSocket } from '../../../components/SocketProvider';
 import { useRouter } from 'next/router';
 import useSWRMutation from 'swr/mutation';
-import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 
@@ -30,7 +33,8 @@ interface Props {
 
 const ChatView = (props: Props) => {
   const users: IUser[] = props.channel.users;
-  const [currentUser, setCurrentUser] = useState<IUser>({});
+  const courses: ICurrentCourse[] = props.channel.chatcourses || [];
+
   const { data: session } = useSession({ required: false });
   const { socket } = useSocket();
   const router = useRouter();
@@ -75,29 +79,13 @@ const ChatView = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, key, users, tab]);
 
-  //  useEffect(() => {
-  //    if (!activeTab || !currentUser?.email || !user?.email || !query.key)
-  //      return;
-  //    (async () => {
-  //      setLoading(true);
-
-  //      const members = [currentUser.email, user.email];
-  //      await trigger({ data: { activeTab, members, channelKey: query.key } });
-  //      setLoading(false);
-  //    })();
-  //  }, [activeTab, currentUser?.email, user?.email, trigger, query.key]);
-
   return (
     <div className={`chatview ${inter.className}`}>
       <ProtectedRoute>
         <>
           <Sidebar isAdmin={isAdmin} />
-          <ChatBar
-            users={users}
-            setCurrentUser={setCurrentUser}
-            currentUser={currentUser}
-          />
-          <MesagePane users={users} currentUser={currentUser} />
+          <ChatBar users={users} courses={courses} />
+          <MesagePane users={users} />
         </>
       </ProtectedRoute>
     </div>

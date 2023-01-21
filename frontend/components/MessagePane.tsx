@@ -19,25 +19,31 @@ export const NoUserSelectedMessagePane = dynamic(
   { ssr: false }
 );
 
-import { IChatMessage, IUser } from '../interfaces/channeltypes';
+import {
+  IChatMessage,
+  IUser,
+  ICurrentCourse,
+} from '../interfaces/channeltypes';
 import { BASE, noAuthFetcher, noAuthPoster } from '../utils/appUtil';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import useHandleServiceReceivedMessage from '../hooks/useHandleServiceReceivedMessage';
 import { getGuestMessages } from '../utils/generalUtils';
+import { setMessages } from '../redux/slices/message';
 
 interface Props {
   users: IUser[];
-  currentUser: IUser;
 }
 
 const MesagePane = (props: Props) => {
   const { data: session } = useSession();
   const user = session?.user;
-  const { currentUser } = props;
-  const [messages, setMessages] = useState<IChatMessage[]>([]);
+  const dispatch = useDispatch();
+  // const { currentUser, selectedCourse } = props;
+  const { currentUser } = useSelector((state: RootState) => state.user);
+  const { selectedCourse } = useSelector((state: RootState) => state.course);
 
   const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState<undefined | boolean>(undefined);
@@ -52,7 +58,9 @@ const MesagePane = (props: Props) => {
   );
 
   const course =
-    activeTab === 'service'
+    activeTab === 'group'
+      ? selectedCourse
+      : activeTab === 'service'
       ? currentCourse
       : currentCourse?.length
       ? currentCourse[0]
@@ -68,13 +76,14 @@ const MesagePane = (props: Props) => {
   const noAuthServiceMessages = useHandleServiceReceivedMessage();
 
   useEffect(() => {
-    if (currentUser?.isGuest || currentUser.name === 'Guest') {
+    if (currentUser?.isGuest || currentUser?.name === 'Guest') {
       let guestMessages: any = getGuestMessages(noAuthServiceMessages);
       const addr = currentUser?.name || '';
       const _messages = guestMessages?.[addr] || [];
-      setMessages(_messages);
+
+      dispatch(setMessages(_messages));
     } else {
-      setMessages(data || []);
+      dispatch(setMessages(data || []));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, currentUser?.id, noAuthServiceMessages, activeTab]);
@@ -82,7 +91,7 @@ const MesagePane = (props: Props) => {
   useEffect(() => {
     if (!activeTab || !friendEmail || !user?.email || !query.key) return;
 
-    if (activeTab === 'service' && !currentUser.name) return;
+    if (activeTab !== 'direct' && !currentUser.name) return;
 
     (async () => {
       setLoading(true);
@@ -100,25 +109,20 @@ const MesagePane = (props: Props) => {
     <div className="messagepane">
       {loading ? (
         <RippleMultiLoader />
-      ) : Object.keys(currentUser).length ? (
+      ) : (currentUser && Object.keys(currentUser).length) ||
+        (selectedCourse && Object.keys(selectedCourse).length) ? (
         <>
-          <MessagePaneHeader currentUser={props.currentUser} />
+          <MessagePaneHeader activeTab={activeTab} />
           <MessageList
-            currentUser={props.currentUser}
             isTyping={isTyping}
             isInIframe={false}
             currentCourse={currentCourse}
-            setMessages={setMessages}
-            messages={messages}
             scrollTargetRef={scrollTargetRef}
           />
           <MessageInput
             isInIframe={false}
             setIsTyping={setIsTyping}
-            currentUser={props.currentUser}
             currentCourse={currentCourse}
-            setMessages={setMessages}
-            messages={messages}
             scrollTargetRef={scrollTargetRef}
           />
         </>
