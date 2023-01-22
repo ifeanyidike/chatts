@@ -1,23 +1,11 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useSocket } from './SocketProvider';
-import {
-  IChatMessage,
-  ICurrentCourse,
-  IUser,
-} from '../interfaces/channeltypes';
+import { IUser } from '../interfaces/channeltypes';
 import { useSession } from 'next-auth/react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import Message from './Message';
-import axios from 'axios';
-import { BASE } from '../utils/appUtil';
-import { RippleLoader } from './Loaders';
-import { getGuestMessages } from '../utils/generalUtils';
-import { useRouter } from 'next/router';
 import GuestInfo from './GuestInfo';
-import { useDispatch } from 'react-redux';
-import { setMessageFlag } from '../redux/slices/general';
-import { addMessage } from '../redux/slices/message';
 
 interface Props {
   isTyping?: boolean;
@@ -37,29 +25,12 @@ interface IUserTyping {
 
 const MessageList = (props: Props) => {
   const { socket } = useSocket();
-  const {
-    isTyping,
-    isInIframe,
-    widgetUser,
-    setWidgetUser,
-    widgetLocation,
-    currentCourse,
-  } = props;
+  const { isTyping, isInIframe, widgetUser, setWidgetUser, widgetLocation } =
+    props;
   const [userTyping, setUserTyping] = useState<IUserTyping>({});
 
   const { data: session } = useSession();
-  const dispatch = useDispatch();
-  const tab = useSelector((state: RootState) => state.general.tab);
-  const { selectedCourse } = useSelector((state: RootState) => state.course);
   const { messages } = useSelector((state: RootState) => state.message);
-
-  const course = selectedCourse
-    ? selectedCourse
-    : currentCourse?.id
-    ? currentCourse
-    : currentCourse?.length
-    ? props.currentCourse[0]
-    : null;
 
   const user = session?.user ||
     widgetUser || {
@@ -93,38 +64,6 @@ const MessageList = (props: Props) => {
       ?.getElementById('chatts__scrollto__element')
       ?.scrollIntoView({ behavior: 'smooth' });
   }, []);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on('onReceiveMessage', (data: any) => {
-      const courseId =
-        course?.chatcourseId || course?.id || widgetUser?.chatcourseId;
-
-      if (courseId !== data.chatcourseId) {
-        return;
-      }
-
-      if (data.type !== tab && !isInIframe) {
-        return;
-      }
-
-      if (tab !== 'group' && data?.user?.email !== user?.email) {
-        dispatch(setMessageFlag({ type: tab, isNew: true }));
-      }
-
-      const formattedMessage: IChatMessage = data;
-      dispatch(addMessage(formattedMessage));
-
-      // props.messageListRef.current.scrollTop =
-      //   props.messageListRef?.current?.scrollHeight;
-      // props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
-      document
-        ?.getElementById('chatts__scrollto__element')
-        ?.scrollIntoView({ behavior: 'smooth' });
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket, session, messages, tab, course, widgetUser]);
 
   return (
     <div

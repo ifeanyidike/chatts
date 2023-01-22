@@ -150,6 +150,12 @@ const ChatWidget = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [widgetUser?.id, noAuthServiceMessages, location, props.messages]);
 
+  useHandleMessages({
+    courseId: widgetUser?.chatcourseId,
+    user: widgetUser,
+    isInIframe: true,
+  });
+
   return (
     <>
       {!openWidget() ? (

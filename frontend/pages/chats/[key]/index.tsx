@@ -22,8 +22,11 @@ import { useSession } from 'next-auth/react';
 import { useSocket } from '../../../components/SocketProvider';
 import { useRouter } from 'next/router';
 import useSWRMutation from 'swr/mutation';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../redux/store';
+import useHandleMessages from '../../../hooks/useHandleMessages';
+import { setMessageFlag } from '../../../redux/slices/general';
+import { addMessage } from '../../../redux/slices/message';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,7 +37,7 @@ interface Props {
 const ChatView = (props: Props) => {
   const users: IUser[] = props.channel.users;
   const courses: ICurrentCourse[] = props.channel.chatcourses || [];
-
+  const dispatch = useDispatch();
   const { data: session } = useSession({ required: false });
   const { socket } = useSocket();
   const router = useRouter();
@@ -42,6 +45,7 @@ const ChatView = (props: Props) => {
   const { key } = query;
   const tab = useSelector((state: RootState) => state.general.tab);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const { selectedCourse } = useSelector((state: RootState) => state.course);
 
   useEffect(() => {
     const creator = props.channel.createdBy;
@@ -58,7 +62,7 @@ const ChatView = (props: Props) => {
   );
 
   useEffect(() => {
-    if (!session?.user?.email || !key || !socket) return;
+    if (!session?.user?.email || !key || !socket || socket.connected) return;
     socket.auth = { user: session.user, channel: key };
 
     socket.connect();
@@ -78,6 +82,11 @@ const ChatView = (props: Props) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, key, users, tab]);
+
+  useHandleMessages({
+    courseId: selectedCourse?.id,
+    user: session?.user,
+  });
 
   return (
     <div className={`chatview ${inter.className}`}>

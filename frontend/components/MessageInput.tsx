@@ -84,6 +84,7 @@ const MessageInput = (props: Props) => {
               id: currentUser?.id,
             },
       }),
+      ...(tab === 'group' && { isDefault: selectedCourse?.isDefault }),
       isInIframe,
       from: props.from,
       type: props.from === 'serviceguest' ? 'service' : tab,

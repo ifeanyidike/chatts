@@ -1,39 +1,55 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useSocket } from '../components/SocketProvider';
 import { IChatMessage, IUser } from '../interfaces/channeltypes';
-import { getGuestMessages } from '../utils/generalUtils';
-import useHandleServiceReceivedMessage from './useHandleServiceReceivedMessage';
+import { setMessageFlag } from '../redux/slices/general';
+import { addMessage } from '../redux/slices/message';
+import { RootState } from '../redux/store';
 
-interface Props {
-  currentUser?: IUser;
-  data?: any;
-}
-const useHandleMessages = (props: Props) => {
-  const [messages, setMessages] = useState<IChatMessage[]>([]);
-  const { currentUser, data } = props;
-
-  const noAuthServiceMessages = useHandleServiceReceivedMessage();
+const useHandleMessages = (props: any) => {
+  const { socket } = useSocket();
+  const { courseId, isInIframe, user } = props;
+  const dispatch = useDispatch();
+  const tab = useSelector((state: RootState) => state.general.tab);
 
   useEffect(() => {
-    if (!currentUser?.id) return;
-    console.log({ currentUser, data });
-    // if (currentUser?.isGuest || currentUser.name === 'Guest') {
-    //   let guestMessages: any = getGuestMessages(noAuthServiceMessages);
-    //   const addr = currentUser?.name || '';
-    //   const _messages = guestMessages?.[addr] || [];
-    //   setMessages(_messages);
-    // }
+    if (!socket) return;
 
-    // if (currentUser?.isGuest || currentUser.name === 'Guest') {
-    //   let guestMessages: any = getGuestMessages(noAuthServiceMessages);
-    //   const addr = currentUser?.name || '';
-    //   const _messages = guestMessages?.[addr] || [];
-    //   setMessages(_messages);
-    // } else {
-    //   setMessages(data || []);
-    // }
+    const messageReceived = (data: any) => {
+      // const courseId =
+      //   course?.chatcourseId || course?.id || widgetUser?.chatcourseId;
+
+      if (courseId !== data.chatcourseId) {
+        return;
+      }
+
+      if (data.type !== tab && !isInIframe) {
+        return;
+      }
+
+      if (tab !== 'group' && data?.user?.email !== user?.email) {
+        dispatch(setMessageFlag({ type: tab, isNew: true }));
+      }
+
+      const formattedMessage: IChatMessage = data;
+
+      dispatch(addMessage(formattedMessage));
+
+      // props.messageListRef.current.scrollTop =
+      //   props.messageListRef?.current?.scrollHeight;
+      // props.scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' });
+      document
+        ?.getElementById('chatts__scrollto__element')
+        ?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    socket.on('onReceiveMessage', messageReceived);
+
+    return () => {
+      socket.off('onReceivedMessage', messageReceived);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
-  return { messages, setMessages };
+  }, [socket, courseId]);
 };
 
 export default useHandleMessages;

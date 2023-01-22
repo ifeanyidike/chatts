@@ -146,7 +146,7 @@ const initializeSocket = (
     // });
 
     socket.on('onSendMessage', async (data: IMessageData) => {
-      console.log({ data }, socket);
+      console.log({ data });
       // message,
       // senderEmail: user?.email,
       // receiverEmail: props.currentUser?.email,

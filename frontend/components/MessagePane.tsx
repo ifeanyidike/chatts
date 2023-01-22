@@ -32,6 +32,7 @@ import { useRouter } from 'next/router';
 import useHandleServiceReceivedMessage from '../hooks/useHandleServiceReceivedMessage';
 import { getGuestMessages } from '../utils/generalUtils';
 import { setMessages } from '../redux/slices/message';
+import { setSelectedCourse } from '../redux/slices/course';
 
 interface Props {
   users: IUser[];
@@ -76,6 +77,22 @@ const MesagePane = (props: Props) => {
   const noAuthServiceMessages = useHandleServiceReceivedMessage();
 
   useEffect(() => {
+    if (activeTab === 'group') return;
+    if (activeTab === 'service' && currentCourse) {
+      dispatch(setSelectedCourse(currentCourse));
+    } else if (activeTab === 'direct' && currentCourse?.length) {
+      const course = currentCourse[0];
+      const selectedCourse = {
+        id: course.chatcourseId,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+        userId: course.userId,
+      };
+      dispatch(setSelectedCourse(selectedCourse));
+    }
+  }, [activeTab, currentCourse]);
+
+  useEffect(() => {
     if (currentUser?.isGuest || currentUser?.name === 'Guest') {
       let guestMessages: any = getGuestMessages(noAuthServiceMessages);
       const addr = currentUser?.name || '';
@@ -86,7 +103,7 @@ const MesagePane = (props: Props) => {
       dispatch(setMessages(data || []));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, currentUser?.id, noAuthServiceMessages, activeTab]);
+  }, [data, currentUser, noAuthServiceMessages, activeTab]);
 
   useEffect(() => {
     if (!activeTab || !friendEmail || !user?.email || !query.key) return;
