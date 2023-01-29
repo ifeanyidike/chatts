@@ -8,7 +8,6 @@ const ConnectSockets = () => {
   const socketRef = useRef<Socket | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const router = useRouter();
-  const { query } = router;
 
   useEffect(() => {
     if (socketRef.current) return;

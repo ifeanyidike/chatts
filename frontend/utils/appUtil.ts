@@ -12,3 +12,6 @@ export const noAuthPoster = async (url: string, { arg }: any) => {
 export const noAuthPutter = async (url: string, { arg }: any) => {
   return await axios.put(url, { ...arg.data }).then(res => res.data);
 };
+
+export const noAuthDeleter = async (url: string) =>
+  await axios.delete(url).then(res => res.data);

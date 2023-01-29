@@ -1,5 +1,4 @@
-import React, { FC, ReactNode, useState, useEffect, useRef } from 'react';
-import useSWR from 'swr';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../components/SocketProvider';
 import axios from 'axios';
 
@@ -7,12 +6,11 @@ import { Inter } from '@next/font/google';
 import ChatButton from '../assets/components/ChatButton';
 import CloseIcon from '../assets/components/CloseIcon';
 import { useRouter } from 'next/router';
-import { BASE, noAuthFetcher } from '../utils/appUtil';
+import { BASE } from '../utils/appUtil';
 import MessageInput from '../components/MessageInput';
 import MessageList from '../components/MessageList';
 import { useSession } from 'next-auth/react';
-import { IChatMessage, IUser } from '../interfaces/channeltypes';
-import { io, Socket } from 'socket.io-client';
+import { IUser } from '../interfaces/channeltypes';
 import useHandleServiceReceivedMessage from '../hooks/useHandleServiceReceivedMessage';
 import useHandleMessages from '../hooks/useHandleMessages';
 import { getGuestMessages } from '../utils/generalUtils';

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSocket } from '../components/SocketProvider';
-import { IChatMessage, IUser } from '../interfaces/channeltypes';
+import { IChatMessage } from '../interfaces/channeltypes';
 import { setMessageFlag } from '../redux/slices/general';
 import { addMessage } from '../redux/slices/message';
 import { RootState } from '../redux/store';
@@ -16,9 +16,6 @@ const useHandleMessages = (props: any) => {
     if (!socket) return;
 
     const messageReceived = (data: any) => {
-      // const courseId =
-      //   course?.chatcourseId || course?.id || widgetUser?.chatcourseId;
-
       if (courseId !== data.chatcourseId) {
         return;
       }

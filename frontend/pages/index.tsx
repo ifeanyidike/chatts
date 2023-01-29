@@ -1,16 +1,12 @@
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Inter } from '@next/font/google';
-import styles from '../styles/Home.module.css';
-import LoginButton from '../components/LoginButton';
-import { useSession, signIn, signOut, getSession } from 'next-auth/react';
+import { useSession, signIn, getSession } from 'next-auth/react';
 import { RippleMultiLoader } from '../components/Loaders';
 import Header from '../components/Header';
-import { BASE, noAuthFetcher } from '../utils/appUtil';
-import useSWR from 'swr';
+import { BASE } from '../utils/appUtil';
 import ChatChannelIcon from '../assets/components/ChatChannelIcon';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
@@ -71,12 +67,7 @@ const Home = (props: Props) => {
       router.push(`/chats/${result.channelKey}`);
     }
   };
-  // const { data, error } = useSWR(
-  //   user?.email ? `${BASE}/channels/user-channels/${user.email}` : null,
-  //   user?.email ? noAuthFetcher : null
-  // );
 
-  // console.log({ data, error });
   if (session == undefined) return <RippleMultiLoader />;
 
   return (

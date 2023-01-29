@@ -1,12 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import dynamic from 'next/dynamic';
 import React, { useEffect, useState, useRef } from 'react';
 import MessageList from './MessageList';
 import useSWR, { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation';
 import { RippleMultiLoader } from '../components/Loaders';
-// import MessagePaneHeader from './MessagePaneHeader';
-// import MessageInput from './MessageInput';
 export const MessagePaneHeader = dynamic(() => import('./MessagePaneHeader'), {
   ssr: false,
 });
@@ -19,11 +16,7 @@ export const NoUserSelectedMessagePane = dynamic(
   { ssr: false }
 );
 
-import {
-  IChatMessage,
-  IUser,
-  ICurrentCourse,
-} from '../interfaces/channeltypes';
+import { IUser } from '../interfaces/channeltypes';
 import { BASE, noAuthFetcher, noAuthPoster } from '../utils/appUtil';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
@@ -42,7 +35,7 @@ const MesagePane = (props: Props) => {
   const { data: session } = useSession();
   const user = session?.user;
   const dispatch = useDispatch();
-  // const { currentUser, selectedCourse } = props;
+
   const { currentUser } = useSelector((state: RootState) => state.user);
   const { selectedCourse } = useSelector((state: RootState) => state.course);
 
@@ -90,6 +83,7 @@ const MesagePane = (props: Props) => {
       };
       dispatch(setSelectedCourse(selectedCourse));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, currentCourse]);
 
   useEffect(() => {

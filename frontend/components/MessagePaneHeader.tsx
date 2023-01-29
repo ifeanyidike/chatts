@@ -5,7 +5,6 @@ import { FiSettings } from 'react-icons/fi';
 import { HiOutlineUserGroup } from 'react-icons/hi';
 import { IoCallOutline } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
-import { ICurrentCourse, IUser } from '../interfaces/channeltypes';
 import { RootState } from '../redux/store';
 
 interface Props {

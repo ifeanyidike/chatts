@@ -1,21 +1,11 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  Dispatch,
-  SetStateAction,
-} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import EmojiIcon from '../assets/components/EmojiIcon';
 import useTypingIndicator from '../hooks/useTypingIndicator';
 import { useSocket } from './SocketProvider';
 import SendIcon from '../assets/components/SendIcon';
-import {
-  IChatMessage,
-  ICurrentCourse,
-  IUser,
-} from '../interfaces/channeltypes';
+import { ICurrentCourse, IUser } from '../interfaces/channeltypes';
 import ClickOutside from '../components/ClickOutside';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';

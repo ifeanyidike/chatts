@@ -1,9 +1,11 @@
-import { User } from '@next-auth/sequelize-adapter/dist/models';
 import Image from 'next/image';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BsCheck2All } from 'react-icons/bs';
 import { HiOutlineUserGroup } from 'react-icons/hi';
+import { IoIosSend } from 'react-icons/io';
+import useSWRMutation from 'swr/mutation';
 import { ICurrentCourse, IUser } from '../interfaces/channeltypes';
+import { BASE, noAuthPoster } from '../utils/appUtil';
 interface Props {
   handleClick: () => void;
   isSelected: boolean;
@@ -11,11 +13,54 @@ interface Props {
   isOnline?: boolean;
   course?: ICurrentCourse;
   activeTab: string;
+  groupCourses?: ICurrentCourse[];
+  setGroupCourses?: React.Dispatch<React.SetStateAction<ICurrentCourse[]>>;
 }
 const ChatItem = (props: Props) => {
   const date = new Date();
   const isOnline: boolean | null = props.isOnline || null;
   const profileImage = props.user?.image || '/avatar.png';
+  const isEditable = props?.course?.isEditable;
+  const [title, setTitle] = useState('');
+
+  const {
+    data: _,
+    trigger,
+    isMutating,
+  } = useSWRMutation(`${BASE}/chatcourse/addnew`, noAuthPoster);
+
+  const handleChange = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    const course = {
+      ...props.course,
+      title,
+    };
+
+    try {
+      await trigger({
+        data: { course },
+      });
+      if (props.setGroupCourses && props.groupCourses) {
+        const _groupCourses = props.groupCourses.map(_course => {
+          if (_course.id === course.id) {
+            return {
+              ...course,
+              isEditable: false,
+            };
+          }
+          return _course;
+        });
+        props.setGroupCourses(_groupCourses);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleEditContent = (e: React.FormEvent<HTMLElement>) => {
+    setTitle(e.currentTarget.outerText);
+  };
   return (
     <div
       className={`chatitem ${props.isSelected ? 'chatitem__selected' : ''} `}
@@ -33,11 +78,27 @@ const ChatItem = (props: Props) => {
           )}
         </div>
         <div className="chatitem__messageinfo">
-          <strong className="name" contentEditable={props?.course?.isEditable}>
-            {props.activeTab === 'group'
-              ? props?.course?.title
-              : props?.user?.name}
-          </strong>
+          <div className="info__header">
+            <strong
+              className="name"
+              contentEditable={isEditable}
+              onInput={handleEditContent}
+            >
+              {props.activeTab === 'group'
+                ? props?.course?.title
+                : props?.user?.name}
+            </strong>
+            {isEditable && (
+              <button onClick={handleChange} disabled={!title}>
+                {isMutating ? (
+                  <div className="ripple embedded__loader"></div>
+                ) : (
+                  <IoIosSend />
+                )}
+              </button>
+            )}
+          </div>
+
           <p className="message">
             <i>No communication yet</i>
           </p>

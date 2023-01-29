@@ -1,9 +1,13 @@
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import useSWRMutation from 'swr/mutation';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ClickOutside from '../components/ClickOutside';
 import { IChatMessage, IUser } from '../interfaces/channeltypes';
+import { BASE, noAuthDeleter } from '../utils/appUtil';
+import { removeMessages } from '../redux/slices/message';
 
 interface Props {
   data: IChatMessage;
@@ -11,6 +15,7 @@ interface Props {
 }
 
 const Message = (props: Props) => {
+  const dispatch = useDispatch();
   const { data } = props;
   const formatTime = (d: Date) => {
     var h = d.getHours();
@@ -45,6 +50,20 @@ const Message = (props: Props) => {
   const userImage = data?.user?.image || '/avatar.png';
   const currentTime = data.createdAt;
 
+  const {
+    data: _,
+    trigger,
+    isMutating,
+  } = useSWRMutation(
+    data.id ? `${BASE}/messages/${data.id}` : null,
+    noAuthDeleter
+  );
+
+  const handleDeleteMessage = async () => {
+    await trigger();
+    dispatch(removeMessages(data.id));
+  };
+
   return (
     <div
       className={`message ${
@@ -71,7 +90,7 @@ const Message = (props: Props) => {
               />
               <div className="message__options">
                 <span>Edit Message</span>
-                <span>Delete</span>
+                <span onClick={handleDeleteMessage}>Delete</span>
                 <span>Reply</span>
               </div>
             </>

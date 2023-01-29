@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { FiSettings } from 'react-icons/fi';
-import useSWR from 'swr';
 import { useRouter } from 'next/router';
 import ChatItem from './ChatItem';
-import SearchBar from './SearchBar';
 import { ICurrentCourse, IUser } from '../interfaces/channeltypes';
 import { useSession } from 'next-auth/react';
 import { useSocket } from './SocketProvider';
-import { BASE, noAuthFetcher } from '../utils/appUtil';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentUser } from '../redux/slices/user';
 import { setSelectedCourse } from '../redux/slices/course';
@@ -15,8 +12,6 @@ import { RootState } from '../redux/store';
 import { IoMdAddCircleOutline } from 'react-icons/io';
 
 interface Props {
-  // setOpenedChat: (e: number) => void;
-  // openedChat: undefined | number;
   activeTab: string;
   users: IUser[];
   courses: ICurrentCourse[];
@@ -52,13 +47,6 @@ const ChatList = (props: Props) => {
   });
 
   const [groupCourses, setGroupCourses] = useState<ICurrentCourse[]>([]);
-
-  // const { data: course, error } = useSWR(
-  //   key && activeTab !== 'direct'
-  //     ? `${BASE}/chatcourse/${key}?type=${activeTab}`
-  //     : null,
-  //   key ? noAuthFetcher : null
-  // );
 
   useEffect(() => {
     if (courses && activeTab === 'group') {
@@ -170,7 +158,8 @@ const ChatList = (props: Props) => {
               handleClick={() => handleClick({ course })}
               course={course}
               activeTab={activeTab}
-              // user={{ ...user, isGuest }}
+              setGroupCourses={setGroupCourses}
+              groupCourses={groupCourses}
             />
           ))
         : Object.entries(channelTypeUsers).map(([tag, users]) => {
@@ -179,9 +168,9 @@ const ChatList = (props: Props) => {
             return (
               <React.Fragment key={tag}>
                 {hasGuests && isGuest ? (
-                  <h4>{tag}</h4>
+                  <h4 className="chatlist__users__header">{tag}</h4>
                 ) : hasUsers ? (
-                  <h4>Users</h4>
+                  <h4 className="chatlist__users__header">Users</h4>
                 ) : null}
                 {users?.map((user: any, index: number) => (
                   <ChatItem

@@ -11,7 +11,6 @@ export const ChatBar = dynamic(() => import('../../../components/ChatBar'), {
 import { BASE, noAuthPutter } from '../../../utils/appUtil';
 import { Inter } from '@next/font/google';
 import MesagePane from '../../../components/MessagePane';
-import Header from '../../../components/Header';
 import {
   IUserChannels,
   IUser,
@@ -25,8 +24,6 @@ import useSWRMutation from 'swr/mutation';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import useHandleMessages from '../../../hooks/useHandleMessages';
-import { setMessageFlag } from '../../../redux/slices/general';
-import { addMessage } from '../../../redux/slices/message';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -91,33 +88,19 @@ const ChatView = (props: Props) => {
   return (
     <div className={`chatview ${inter.className}`}>
       <ProtectedRoute>
-        <>
-          <Sidebar isAdmin={isAdmin} />
-          <ChatBar users={users} courses={courses} />
-          <MesagePane users={users} />
-        </>
+        <Sidebar isAdmin={isAdmin} />
+        {tab === 'direct' || tab === 'service' || tab === 'group' ? (
+          <>
+            <ChatBar users={users} courses={courses} />
+            <MesagePane users={users} />
+          </>
+        ) : null}
       </ProtectedRoute>
     </div>
   );
 };
 
 export default ChatView;
-
-// export const getServerSideProps = async () => {
-//   const res = await fetch(`${BASE}/channels`);
-//   const channels = await res.json();
-
-//   return {
-//     paths: channels.map((c: any) => {
-//       return {
-//         params: {
-//           key: c.key,
-//         },
-//       };
-//     }),
-//     fallback: false,
-//   };
-// };
 
 export const getStaticPaths = async () => {
   const res = await fetch(`${BASE}/channels`);

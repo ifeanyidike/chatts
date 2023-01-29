@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getGuestMessages } from '../utils/generalUtils';
 import { BASE } from '../utils/appUtil';
 import { useRouter } from 'next/router';
-import { IChatMessage, IUser } from '../interfaces/channeltypes';
+import { IUser } from '../interfaces/channeltypes';
 import { useDispatch } from 'react-redux';
 import { setMessages } from '../redux/slices/message';
 

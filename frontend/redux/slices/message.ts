@@ -20,10 +20,16 @@ export const messageSlice = createSlice({
     addMessage: (state, action: PayloadAction<IChatMessage>) => {
       state.messages = [...state.messages, action.payload];
     },
+    removeMessages: (state, action: PayloadAction<string>) => {
+      const messages = state.messages.filter(
+        message => message.id !== action.payload
+      );
+      state.messages = messages;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setMessages, addMessage } = messageSlice.actions;
+export const { setMessages, addMessage, removeMessages } = messageSlice.actions;
 
 export default messageSlice.reducer;
