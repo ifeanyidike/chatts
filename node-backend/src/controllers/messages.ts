@@ -26,3 +26,27 @@ export const getCourseMessages = async (req: any, res: any, next: Function) => {
     next(error);
   }
 };
+
+export const deleteMessage = async (req: any, res: any, next: Function) => {
+  try {
+    const { id } = req.params;
+    await Message.destroy({ where: { id } });
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editMessage = async (req: any, res: any, next: Function) => {
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
+    await Message.update(
+      { text: message, html: `<p>${message}</p>` },
+      { where: { id } }
+    );
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+};
