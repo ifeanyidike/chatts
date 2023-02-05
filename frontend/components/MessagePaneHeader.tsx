@@ -6,6 +6,7 @@ import { HiOutlineUserGroup } from 'react-icons/hi';
 import { IoCallOutline } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
+import MuiPopper from './MuiPopper';
 
 interface Props {
   activeTab: string;
@@ -14,11 +15,18 @@ interface Props {
 const MessagePaneHeader = (props: Props) => {
   const { currentUser } = useSelector((state: RootState) => state.user);
   const { selectedCourse } = useSelector((state: RootState) => state.course);
+  const tab: string = props.activeTab;
   const profileImage = currentUser?.image || '/avatar.png';
 
   return (
     <div className="messagepane__header">
-      <h2>Message Detail</h2>
+      <h2>
+        {tab === 'direct'
+          ? 'Direct chat'
+          : tab === 'service'
+          ? 'Customer service'
+          : 'Group chat'}
+      </h2>
 
       <div className="header__details">
         <div className="header__left">
@@ -35,21 +43,23 @@ const MessagePaneHeader = (props: Props) => {
                 ? selectedCourse?.title
                 : currentUser?.name}
             </strong>
-            <p className="status">
-              <i>No communication yet</i>
-            </p>
+            <p className="status">{/* <i>No communication yet</i> */}</p>
           </div>
         </div>
 
         <div className="header__right">
           <span>
+            {tab === 'group' && !selectedCourse?.isDefault ? (
+              <MuiPopper />
+            ) : (
+              <FiSettings />
+            )}
+          </span>
+          <span>
             <IoCallOutline />
           </span>
           <span>
             <BiVideo />
-          </span>
-          <span>
-            <FiSettings />
           </span>
         </div>
       </div>

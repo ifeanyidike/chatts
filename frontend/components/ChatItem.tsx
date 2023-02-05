@@ -6,6 +6,7 @@ import { IoIosSend } from 'react-icons/io';
 import useSWRMutation from 'swr/mutation';
 import { ICurrentCourse, IUser } from '../interfaces/channeltypes';
 import { BASE, noAuthPoster } from '../utils/appUtil';
+import { getMaxMessage } from '../utils/generalUtils';
 interface Props {
   handleClick: () => void;
   isSelected: boolean;
@@ -22,6 +23,7 @@ const ChatItem = (props: Props) => {
   const profileImage = props.user?.image || '/avatar.png';
   const isEditable = props?.course?.isEditable;
   const [title, setTitle] = useState('');
+  const messages = props.user?.messages || props.course?.messages;
 
   const {
     data: _,
@@ -100,7 +102,9 @@ const ChatItem = (props: Props) => {
           </div>
 
           <p className="message">
-            <i>No communication yet</i>
+            <i>
+              <>{getMaxMessage(messages)}</>
+            </i>
           </p>
         </div>
       </div>

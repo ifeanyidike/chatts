@@ -8,6 +8,7 @@ import ClickOutside from '../components/ClickOutside';
 import { IChatMessage, IUser } from '../interfaces/channeltypes';
 import { BASE, noAuthDeleter } from '../utils/appUtil';
 import { removeMessages } from '../redux/slices/message';
+import { removeCourseMessage } from '../redux/slices/course';
 
 interface Props {
   data: IChatMessage;
@@ -62,6 +63,12 @@ const Message = (props: Props) => {
   const handleDeleteMessage = async () => {
     await trigger();
     dispatch(removeMessages(data.id));
+    dispatch(
+      removeCourseMessage({
+        messageId: data.id,
+        courseId: data.chatcourse?.id || '',
+      })
+    );
   };
 
   return (

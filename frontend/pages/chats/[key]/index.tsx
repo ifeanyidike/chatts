@@ -24,6 +24,7 @@ import useSWRMutation from 'swr/mutation';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import useHandleMessages from '../../../hooks/useHandleMessages';
+import { setCourses } from '../../../redux/slices/course';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -33,6 +34,7 @@ interface Props {
 
 const ChatView = (props: Props) => {
   const users: IUser[] = props.channel.users;
+
   const courses: ICurrentCourse[] = props.channel.chatcourses || [];
   const dispatch = useDispatch();
   const { data: session } = useSession({ required: false });
@@ -43,6 +45,11 @@ const ChatView = (props: Props) => {
   const tab = useSelector((state: RootState) => state.general.tab);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const { selectedCourse } = useSelector((state: RootState) => state.course);
+
+  useEffect(() => {
+    dispatch(setCourses(courses));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const creator = props.channel.createdBy;
@@ -91,7 +98,7 @@ const ChatView = (props: Props) => {
         <Sidebar isAdmin={isAdmin} />
         {tab === 'direct' || tab === 'service' || tab === 'group' ? (
           <>
-            <ChatBar users={users} courses={courses} />
+            <ChatBar users={users} />
             <MesagePane users={users} />
           </>
         ) : null}

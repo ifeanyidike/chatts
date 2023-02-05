@@ -7,16 +7,15 @@ import { RootState } from '../redux/store';
 
 interface Props {
   users: IUser[];
-  courses: ICurrentCourse[];
 }
 const ChatBar = (props: Props) => {
-  const { users, courses } = props;
+  const { users } = props;
   const tab = useSelector((state: RootState) => state.general.tab);
 
   return (
     <div className="chatbar">
       <SearchBar activeTab={tab} />
-      <ChatList activeTab={tab} users={users} courses={courses} />
+      <ChatList activeTab={tab} users={users} />
     </div>
   );
 };

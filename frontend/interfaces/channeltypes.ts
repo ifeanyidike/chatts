@@ -9,6 +9,7 @@ export interface IUser {
   updatedAt?: Date;
   isGuest?: boolean;
   currentUser?: IUser;
+  messages?: IChatMessage[];
 }
 
 export interface IChannelUsers {
@@ -40,6 +41,7 @@ export interface ICurrentCourse {
   userId?: string;
   isEditable?: boolean;
   isDefault?: boolean;
+  messages?: IChatMessage[];
 }
 
 export interface ISocketUser {
@@ -68,4 +70,9 @@ export interface IChatMessage {
   // type: string;
   // courseId?: string;
   // createdAt?: Date;
+}
+
+export interface ICourseMessage {
+  id: string;
+  message: IChatMessage;
 }

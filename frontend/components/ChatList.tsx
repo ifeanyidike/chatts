@@ -14,7 +14,7 @@ import { IoMdAddCircleOutline } from 'react-icons/io';
 interface Props {
   activeTab: string;
   users: IUser[];
-  courses: ICurrentCourse[];
+  // courses: ICurrentCourse[];
 }
 
 interface ChannelTypeUsers {
@@ -31,14 +31,16 @@ const ChatList = (props: Props) => {
   const dispatch = useDispatch();
 
   const { currentUser } = useSelector((state: RootState) => state.user);
-  const { selectedCourse } = useSelector((state: RootState) => state.course);
+  const { selectedCourse, courses } = useSelector(
+    (state: RootState) => state.course
+  );
 
   const { data: session } = useSession();
   const { onlineUsers } = useSocket();
   const { users, activeTab } = props;
   const [hasGuests, setHasGuests] = useState<boolean>(false);
   const { query } = useRouter();
-  const courses = props.courses;
+
   const { key } = query;
 
   const [channelTypeUsers, setChannelTypeUsers] = useState<ChannelTypeUsers>({
@@ -84,6 +86,7 @@ const ChatList = (props: Props) => {
             tags: c.tags,
             id: currentUser.id,
             currentUser,
+            messages: c.messages,
           };
         });
       const hasGuests = !!guests.length;
@@ -96,8 +99,21 @@ const ChatList = (props: Props) => {
     } else {
       const _users =
         users.filter((user: any) => user.email !== session?.user?.email) || [];
+      const usersPopulated = _users.map(user => {
+        const chat = courses.find(
+          (c: any) =>
+            c?.type === 'direct' &&
+            c?.users.some((u: any) => u?.email === user.email) &&
+            c?.users.some((u: any) => u?.email === session?.user?.email)
+        );
+        return {
+          ...user,
+          messages: chat?.messages || [],
+        };
+      });
+
       setChannelTypeUsers({
-        authUsers: _users,
+        authUsers: usersPopulated,
       });
     }
   }, [users, activeTab, session, courses]);

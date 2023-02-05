@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import Channel from '../models/Channel';
 import ChatCourse from '../models/chatcourse';
+import Message from '../models/Message';
 import User from '../models/User';
 
 export const getChannelByKey = async (req: any, res: any, next: any) => {
@@ -14,13 +15,26 @@ export const getChannelByKey = async (req: any, res: any, next: any) => {
         },
         {
           model: ChatCourse,
-          include: [User],
+          include: [
+            {
+              model: User,
+            },
+            {
+              model: Message,
+              include: [User],
+            },
+          ],
         },
+      ],
+      order: [
+        // [ChatCourse, 'createdAt', 'ASC'],
+        [ChatCourse, Message, 'createdAt', 'ASC'],
       ],
     });
 
     res.status(200).json(channel);
   } catch (error) {
+    console.log;
     next(error);
   }
 };

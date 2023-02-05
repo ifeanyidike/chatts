@@ -16,7 +16,7 @@ export const NoUserSelectedMessagePane = dynamic(
   { ssr: false }
 );
 
-import { IUser } from '../interfaces/channeltypes';
+import { ICurrentCourse, IUser } from '../interfaces/channeltypes';
 import { BASE, noAuthFetcher, noAuthPoster } from '../utils/appUtil';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
@@ -50,6 +50,7 @@ const MesagePane = (props: Props) => {
     activeTab ? `${BASE}/chatcourse` : null,
     noAuthPoster
   );
+  const { courses } = useSelector((state: RootState) => state.course);
 
   const course =
     activeTab === 'group'
@@ -62,16 +63,16 @@ const MesagePane = (props: Props) => {
 
   const courseId = course ? course.chatcourseId || course.id : null;
 
-  const { data, error } = useSWR(
-    courseId ? `${BASE}/messages/${courseId}` : null,
-    courseId ? noAuthFetcher : null
-  );
+  // const { data, error } = useSWR(
+  //   courseId ? `${BASE}/messages/${courseId}` : null,
+  //   courseId ? noAuthFetcher : null
+  // );
 
   const noAuthServiceMessages = useHandleServiceReceivedMessage();
 
   useEffect(() => {
     if (activeTab === 'group') return;
-    if (activeTab === 'service' && currentCourse) {
+    if (activeTab === 'service' && currentCourse && !currentCourse.length) {
       dispatch(setSelectedCourse(currentCourse));
     } else if (activeTab === 'direct' && currentCourse?.length) {
       const course = currentCourse[0];
@@ -94,10 +95,11 @@ const MesagePane = (props: Props) => {
 
       dispatch(setMessages(_messages));
     } else {
-      dispatch(setMessages(data || []));
+      const course = courses.find((c: ICurrentCourse) => c.id === courseId);
+      dispatch(setMessages(course?.messages || []));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, currentUser, noAuthServiceMessages, activeTab]);
+  }, [currentUser, noAuthServiceMessages, activeTab, courses, courseId]);
 
   useEffect(() => {
     if (!activeTab || !friendEmail || !user?.email || !query.key) return;
